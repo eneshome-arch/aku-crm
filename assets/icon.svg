@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1C6EF2"/>
+      <stop offset="100%" style="stop-color:#0A3FD4"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:white;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:white;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded background -->
+  <rect width="1024" height="1024" rx="220" ry="220" fill="url(#bg)"/>
+
+  <!-- Shine overlay -->
+  <rect width="1024" height="520" rx="220" ry="220" fill="url(#shine)"/>
+
+  <!-- Phone handset icon (centered, white) -->
+  <g transform="translate(512,512)" fill="white" opacity="0.97">
+    <!-- Modern phone icon -->
+    <path d="
+      M -140 -220
+      C -140 -260, -110 -280, -75 -280
+      L -15 -280
+      C 20 -280, 45 -260, 50 -225
+      L 65 -155
+      C 70 -118, 50 -90, 15 -82
+      L -20 -74
+      C -28 -72, -30 -65, -26 -58
+      C 10 20, 60 85, 130 140
+      C 138 147, 145 143, 148 135
+      L 162 100
+      C 172 68, 200 50, 232 58
+      L 300 76
+      C 334 85, 350 112, 345 145
+      L 330 210
+      C 324 245, 300 265, 265 265
+      C 50 265, -200 10, -200 -170
+      Z
+    " transform="scale(0.88)"/>
+  </g>
+
+  <!-- Small arc lines (signal/connection) -->
+  <g transform="translate(620, 330)" fill="none" stroke="white" stroke-linecap="round" opacity="0.75">
+    <path d="M 0 0 Q 35 -30 70 0" stroke-width="28"/>
+    <path d="M -20 -55 Q 35 -105 90 -55" stroke-width="28"/>
+  </g>
+</svg>

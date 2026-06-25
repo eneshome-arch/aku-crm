@@ -1,0 +1,31 @@
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  init: () => ipcRenderer.invoke('db:init'),
+  query: (sql, params) => ipcRenderer.invoke('db:query', sql, params),
+  extract: (url) => ipcRenderer.invoke('fetch:extract', url),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+  testEmail: (config) => ipcRenderer.invoke('email:test', config),
+  sendEmails: (config, recipients) => ipcRenderer.invoke('email:send', config, recipients),
+  register: (data) => ipcRenderer.invoke('auth:register', data),
+  login: (data) => ipcRenderer.invoke('auth:login', data),
+  updateProfile: (userId, data) => ipcRenderer.invoke('auth:updateProfile', userId, data),
+  touchId: (reason) => ipcRenderer.invoke('auth:touchId', reason),
+  getUserById: (userId) => ipcRenderer.invoke('auth:getUserById', userId),
+  campaignsSave: (data) => ipcRenderer.invoke('campaigns:save', data),
+  campaignsList: (userId) => ipcRenderer.invoke('campaigns:list', userId),
+  campaignsGet: (id) => ipcRenderer.invoke('campaigns:get', id),
+  campaignsDelete: (id) => ipcRenderer.invoke('campaigns:delete', id),
+  adminGetUsers: () => ipcRenderer.invoke('admin:getUsers'),
+  adminGetUserDetail: (userId) => ipcRenderer.invoke('admin:getUserDetail', userId),
+  adminDeleteUser: (userId) => ipcRenderer.invoke('admin:deleteUser', userId),
+  adminResetPassword: (userId, newPassword) => ipcRenderer.invoke('admin:resetPassword', userId, newPassword),
+  // Window controls
+  platform: process.platform,
+  windowMinimize: () => ipcRenderer.invoke('window:minimize'),
+  windowMaximize: () => ipcRenderer.invoke('window:maximize'),
+  windowClose: () => ipcRenderer.invoke('window:close'),
+  windowIsMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+  onWindowMaximized: (cb) => ipcRenderer.on('window:maximized', (_, v) => cb(v)),
+})
