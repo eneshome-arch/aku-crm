@@ -16,6 +16,8 @@
     "mac": {
       "category": "public.app-category.business",
       "icon": "assets/icon.icns",
+      "identity": "-",
+      "gatekeeperAssess": false,
       "target": [
         {
           "target": "dmg",
@@ -42,6 +44,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     },
+    "extraResources": [
+      { "from": "config.json", "to": "config.json" }
+    ],
     "files": [
       "dist/**/*",
       "electron/**/*",

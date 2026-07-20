@@ -8,8 +8,17 @@ const nodemailer = require('nodemailer')
 const Store = require('electron-store')
 const bcrypt = require('bcryptjs')
 
-// Umgebungsvariablen laden (.env nur im Dev-Modus)
+// Umgebungsvariablen laden: .env (Dev) oder config.json (gebündelte App)
 try { require('dotenv').config({ path: path.join(__dirname, '../.env') }) } catch {}
+try {
+  const configPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'config.json')
+    : path.join(__dirname, '../config.json')
+  const cfg = JSON.parse(require('fs').readFileSync(configPath, 'utf8'))
+  for (const [k, v] of Object.entries(cfg)) {
+    if (!process.env[k]) process.env[k] = v
+  }
+} catch {}
 
 const DOC_PREFIXES = { angebot: 'ZB', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
 
