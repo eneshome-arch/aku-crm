@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   init: () => ipcRenderer.invoke('db:init'),
   query: (sql, params) => ipcRenderer.invoke('db:query', sql, params),
   extract: (url) => ipcRenderer.invoke('fetch:extract', url),
+  overpass: (query) => ipcRenderer.invoke('fetch:overpass', query),
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
   testEmail: (config) => ipcRenderer.invoke('email:test', config),

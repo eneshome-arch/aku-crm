@@ -97,17 +97,12 @@ export default function FindCustomers({ userId, userLat, userLon, onAddContact, 
     setResults([])
     try {
       const query = buildOverpassQuery(userLat || 52.3759, userLon || 9.7320)
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: query,
-        headers: { 'Content-Type': 'text/plain' },
-      })
-      const data = await res.json()
+      const data = await window.electronAPI.overpass(query)
       const parsed = parseResults(data.elements || [])
       setResults(parsed)
       if (parsed.length === 0) setError('Keine Ergebnisse gefunden.')
     } catch (e) {
-      setError('Fehler beim Laden: ' + e.message)
+      setError(e.message || 'Fehler beim Laden der Daten.')
     }
     setLoading(false)
   }

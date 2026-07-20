@@ -608,6 +608,35 @@ ipcMain.handle('campaigns:delete', async (event, campaignId) => {
   }
 })
 
+ipcMain.handle('fetch:overpass', async (_, query) => {
+  return new Promise((resolve, reject) => {
+    const body = Buffer.from(query)
+    const req = https.request({
+      hostname: 'overpass-api.de',
+      path: '/api/interpreter',
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain', 'Content-Length': body.length, 'User-Agent': 'AkuCRM/1.0' },
+      timeout: 30000,
+    }, (res) => {
+      let data = ''
+      res.on('data', chunk => data += chunk)
+      res.on('end', () => {
+        const ct = res.headers['content-type'] || ''
+        if (!ct.includes('json') && data.trim().startsWith('<')) {
+          reject(new Error('Overpass API nicht erreichbar. Bitte später erneut versuchen.'))
+          return
+        }
+        try { resolve(JSON.parse(data)) }
+        catch { reject(new Error('Ungültige Antwort vom Server.')) }
+      })
+    })
+    req.on('error', (e) => reject(new Error('Netzwerkfehler: ' + e.message)))
+    req.on('timeout', () => { req.destroy(); reject(new Error('Zeitüberschreitung. Bitte erneut versuchen.')) })
+    req.write(body)
+    req.end()
+  })
+})
+
 ipcMain.handle('fetch:extract', async (event, url) => {
   try {
     const html = await fetchUrl(url)
