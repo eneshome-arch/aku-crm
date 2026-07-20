@@ -8,16 +8,19 @@ const nodemailer = require('nodemailer')
 const Store = require('electron-store')
 const bcrypt = require('bcryptjs')
 
+// Umgebungsvariablen laden (.env nur im Dev-Modus, in der fertigen App über electron-store)
+try { require('dotenv').config({ path: path.join(__dirname, '../.env') }) } catch {}
+
 const DOC_PREFIXES = { angebot: 'ZB', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
 
 const store = new Store({ name: 'aku-settings' })
 
 const pool = new Pool({
-  host: '46.224.59.145',
-  port: 5432,
-  user: 'postgres',
-  password: 'IhMfRhzWsgDVCJG5gLd2B5ZO4y30icXGf6mE4qErUlyEplK6aKV983XttVlby69v',
-  database: 'postgres',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '5432'),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'postgres',
   ssl: false,
   connectionTimeoutMillis: 5000,
   idleTimeoutMillis: 10000,

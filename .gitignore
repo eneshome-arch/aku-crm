@@ -7,3 +7,4 @@ release/
 *.AppImage
 .DS_Store
 *.log
+.env

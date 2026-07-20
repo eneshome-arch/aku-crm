@@ -16,10 +16,25 @@
     "mac": {
       "category": "public.app-category.business",
       "icon": "assets/icon.icns",
-      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }]
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
     },
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }]
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": true,
@@ -37,6 +52,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "electron-store": "^8.2.0",
     "lucide-react": "^1.21.0",
     "nodemailer": "^9.0.1",
@@ -47,7 +63,7 @@
     "autoprefixer": "^10.4.0",
     "concurrently": "^8.0.0",
     "electron": "^28.0.0",
-    "electron-builder": "^24.0.0",
+    "electron-builder": "^24.13.3",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
