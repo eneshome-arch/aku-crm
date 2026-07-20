@@ -21,6 +21,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   adminGetUserDetail: (userId) => ipcRenderer.invoke('admin:getUserDetail', userId),
   adminDeleteUser: (userId) => ipcRenderer.invoke('admin:deleteUser', userId),
   adminResetPassword: (userId, newPassword) => ipcRenderer.invoke('admin:resetPassword', userId, newPassword),
+  // Offers / Angebote
+  offersList: (userId) => ipcRenderer.invoke('offers:list', userId),
+  offersSave: (data) => ipcRenderer.invoke('offers:save', data),
+  offersDelete: (offerId, userId) => ipcRenderer.invoke('offers:delete', offerId, userId),
+  offersExportPdf: (data) => ipcRenderer.invoke('offers:exportPdf', data),
   // Window controls
   platform: process.platform,
   windowMinimize: () => ipcRenderer.invoke('window:minimize'),

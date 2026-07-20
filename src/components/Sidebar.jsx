@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, LayoutDashboard, AlertTriangle, Phone, Mail, Settings, Shield } from 'lucide-react'
+import { Plus, Search, LayoutDashboard, AlertTriangle, Phone, Mail, Settings, Shield, FileText } from 'lucide-react'
 
 const platform = window.electronAPI?.platform || 'darwin'
 
@@ -40,7 +40,7 @@ function isOverdue(dt) {
   return new Date(dt) < new Date()
 }
 
-export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, currentView, isAdmin }) {
+export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, onOpenAngebote, currentView, isAdmin }) {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState(0)
 
@@ -120,6 +120,17 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
         >
           <Mail size={15} />
           E-Mail Marketing
+        </button>
+        <button
+          onClick={onOpenAngebote}
+          className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+            currentView === 'angebote'
+              ? 'bg-orange-50 text-orange-600'
+              : 'text-orange-500 hover:bg-orange-50'
+          }`}
+        >
+          <FileText size={15} />
+          Angebote
         </button>
       </div>
 

@@ -1,11 +1,14 @@
-const { app, BrowserWindow, ipcMain, systemPreferences } = require('electron')
+const { app, BrowserWindow, ipcMain, systemPreferences, dialog } = require('electron')
 const path = require('path')
 const https = require('https')
 const http = require('http')
+const fs = require('fs')
 const { Pool } = require('pg')
 const nodemailer = require('nodemailer')
 const Store = require('electron-store')
 const bcrypt = require('bcryptjs')
+
+const DOC_PREFIXES = { angebot: 'ZB', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
 
 const store = new Store({ name: 'aku-settings' })
 
@@ -119,9 +122,117 @@ ipcMain.handle('db:init', async () => {
         sent_at TIMESTAMP DEFAULT NOW()
       )
     `)
+    // Offers / Angebote
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS offers (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        contact_id INTEGER REFERENCES contacts(id) ON DELETE SET NULL,
+        doc_type VARCHAR(30) DEFAULT 'angebot',
+        offer_number VARCHAR(50),
+        title VARCHAR(255) NOT NULL,
+        items JSONB DEFAULT '[]',
+        notes TEXT,
+        tax_rate DECIMAL(5,2) DEFAULT 19,
+        subtotal DECIMAL(10,2) DEFAULT 0,
+        tax_amount DECIMAL(10,2) DEFAULT 0,
+        total DECIMAL(10,2) DEFAULT 0,
+        status VARCHAR(20) DEFAULT 'entwurf',
+        valid_until DATE,
+        due_date DATE,
+        service_location TEXT DEFAULT '',
+        processor VARCHAR(255) DEFAULT '',
+        intro_text TEXT DEFAULT '',
+        template VARCHAR(30) DEFAULT 'zeitblick',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `)
     return { success: true }
   } catch (err) {
     console.error('DB init error:', err)
+    return { success: false, error: err.message }
+  }
+})
+
+// Offers / Angebote
+ipcMain.handle('offers:list', async (event, userId) => {
+  try {
+    const res = await pool.query(
+      `SELECT * FROM offers WHERE user_id=$1 ORDER BY created_at DESC`,
+      [userId]
+    )
+    return { success: true, offers: res.rows }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+ipcMain.handle('offers:save', async (event, { id, userId, contactId, docType, offerNumber, title, items, notes, taxRate, subtotal, taxAmount, total, status, validUntil, dueDate, serviceLocation, processor, introText, template }) => {
+  try {
+    const type = docType || 'angebot'
+    if (id) {
+      await pool.query(`
+        UPDATE offers SET contact_id=$1, offer_number=$2, title=$3, items=$4, notes=$5, tax_rate=$6,
+          subtotal=$7, tax_amount=$8, total=$9, status=$10, valid_until=$11, doc_type=$12, due_date=$13,
+          service_location=$14, processor=$15, intro_text=$16, template=$17, updated_at=NOW()
+        WHERE id=$18 AND user_id=$19
+      `, [contactId||null, offerNumber||'', title, JSON.stringify(items||[]), notes||'', taxRate||19,
+          subtotal||0, taxAmount||0, total||0, status||'entwurf', validUntil||null, type, dueDate||null,
+          serviceLocation||'', processor||'', introText||'', template||'zeitblick', id, userId])
+      return { success: true, id }
+    } else {
+      const year = new Date().getFullYear()
+      const prefix = DOC_PREFIXES[type] || 'ZB'
+      const countRes = await pool.query(
+        `SELECT COUNT(*) FROM offers WHERE user_id=$1 AND doc_type=$2 AND EXTRACT(YEAR FROM created_at)=$3`,
+        [userId, type, year]
+      )
+      const num = String(parseInt(countRes.rows[0].count) + 1).padStart(3, '0')
+      const autoNumber = offerNumber || `${prefix}-${year}-${num}`
+      const res = await pool.query(`
+        INSERT INTO offers (user_id, contact_id, doc_type, offer_number, title, items, notes, tax_rate, subtotal, tax_amount, total, status, valid_until, due_date, service_location, processor, intro_text, template)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id
+      `, [userId, contactId||null, type, autoNumber, title, JSON.stringify(items||[]), notes||'', taxRate||19,
+          subtotal||0, taxAmount||0, total||0, status||'entwurf', validUntil||null, dueDate||null,
+          serviceLocation||'', processor||'', introText||'', template||'zeitblick'])
+      return { success: true, id: res.rows[0].id, offerNumber: autoNumber }
+    }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+ipcMain.handle('offers:delete', async (event, offerId, userId) => {
+  try {
+    await pool.query('DELETE FROM offers WHERE id=$1 AND user_id=$2', [offerId, userId])
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+ipcMain.handle('offers:exportPdf', async (event, { html, filename }) => {
+  try {
+    const { filePath, canceled } = await dialog.showSaveDialog({
+      defaultPath: filename || 'angebot.pdf',
+      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+    })
+    if (canceled || !filePath) return { success: false, error: 'Abgebrochen' }
+    const win = new BrowserWindow({ show: false, webPreferences: { contextIsolation: true } })
+    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
+    await new Promise(resolve => setTimeout(resolve, 600))
+    const pdfData = await win.webContents.printToPDF({
+      printBackground: true,
+      pageSize: 'A4',
+      margins: { top: 0, bottom: 0, left: 0, right: 0 },
+    })
+    win.close()
+    fs.writeFileSync(filePath, pdfData)
+    const { shell } = require('electron')
+    shell.openPath(filePath)
+    return { success: true, filePath }
+  } catch (err) {
     return { success: false, error: err.message }
   }
 })

@@ -12,6 +12,7 @@ import Settings from './components/Settings'
 import Login from './components/Login'
 import AdminPanel from './components/AdminPanel'
 import WindowsTitleBar from './components/WindowsTitleBar'
+import AngeboteModule from './components/AngeboteModule'
 
 const platform = window.electronAPI?.platform || 'darwin'
 
@@ -150,6 +151,7 @@ export default function App() {
         onEmailMarketing={() => setShowEmailMarketing(true)}
         onOpenSettings={() => { setSelectedContact(null); setView('settings') }}
         onOpenAdmin={() => { setSelectedContact(null); setView('admin') }}
+        onOpenAngebote={() => { setSelectedContact(null); setView('angebote') }}
         currentView={view}
         isAdmin={currentUser?.is_admin}
       />
@@ -177,6 +179,7 @@ export default function App() {
           />
         )}
         {view === 'admin' && currentUser?.is_admin && <AdminPanel />}
+        {view === 'angebote' && <AngeboteModule currentUser={currentUser} />}
       </main>
 
       {showAddForm && (
