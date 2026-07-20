@@ -8,26 +8,68 @@ const nodemailer = require('nodemailer')
 const Store = require('electron-store')
 const bcrypt = require('bcryptjs')
 
-// Umgebungsvariablen laden (.env nur im Dev-Modus, in der fertigen App über electron-store)
+// Umgebungsvariablen laden (.env nur im Dev-Modus)
 try { require('dotenv').config({ path: path.join(__dirname, '../.env') }) } catch {}
 
 const DOC_PREFIXES = { angebot: 'ZB', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
 
 const store = new Store({ name: 'aku-settings' })
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'postgres',
-  ssl: false,
-  connectionTimeoutMillis: 5000,
-  idleTimeoutMillis: 10000,
+// DB-Konfiguration: erst .env, dann electron-store
+const getDbConfig = () => {
+  const saved = store.get('dbConfig') || {}
+  return {
+    host: process.env.DB_HOST || saved.host || '',
+    port: parseInt(process.env.DB_PORT || saved.port || '5432'),
+    user: process.env.DB_USER || saved.user || 'postgres',
+    password: process.env.DB_PASSWORD || saved.password || '',
+    database: process.env.DB_NAME || saved.database || 'postgres',
+  }
+}
+
+let pool = null
+
+const createPool = () => {
+  const cfg = getDbConfig()
+  if (!cfg.host || !cfg.password) return null
+  return new Pool({ ...cfg, ssl: false, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000 })
+}
+
+pool = createPool()
+
+ipcMain.handle('db:configure', async (_, config) => {
+  store.set('dbConfig', config)
+  if (pool) { try { await pool.end() } catch {} }
+  pool = createPool()
+  try {
+    const client = await pool.connect()
+    await client.query('SELECT 1')
+    client.release()
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+ipcMain.handle('db:getConfig', async () => {
+  return store.get('dbConfig') || {}
+})
+
+ipcMain.handle('db:isConfigured', async () => {
+  if (!pool) return false
+  try {
+    const client = await pool.connect()
+    await client.query('SELECT 1')
+    client.release()
+    return true
+  } catch {
+    return false
+  }
 })
 
 
 ipcMain.handle('db:init', async () => {
+  if (!pool) return { error: 'Nicht konfiguriert' }
   try {
     // Clean up orphaned sequence only if users table doesn't exist yet
     await pool.query(`

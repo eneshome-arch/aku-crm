@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Database } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import ContactProfile from './components/ContactProfile'
@@ -26,8 +26,11 @@ export default function App() {
   const [showCallList, setShowCallList] = useState(false)
   const [callSession, setCallSession] = useState(null)
   const [showEmailMarketing, setShowEmailMarketing] = useState(false)
-  const [dbStatus, setDbStatus] = useState('connecting') // 'connecting' | 'ok' | 'error'
+  const [dbStatus, setDbStatus] = useState('connecting') // 'connecting' | 'ok' | 'error' | 'setup'
   const [dbError, setDbError] = useState('')
+  const [dbSetup, setDbSetup] = useState({ host: '', port: '5432', user: 'postgres', password: '', database: 'postgres' })
+  const [dbSetupLoading, setDbSetupLoading] = useState(false)
+  const [dbSetupError, setDbSetupError] = useState('')
 
   const loadContacts = useCallback(async (userId) => {
     const uid = userId || currentUser?.id
@@ -49,20 +52,50 @@ export default function App() {
   useEffect(() => {
     async function init() {
       try {
+        const configured = await window.electronAPI.dbIsConfigured()
+        if (!configured) {
+          const saved = await window.electronAPI.dbGetConfig()
+          if (saved && saved.host) setDbSetup(s => ({ ...s, ...saved }))
+          setDbStatus('setup')
+          return
+        }
         const res = await window.electronAPI.init()
-        if (res.success) {
+        if (res && res.success) {
           setDbStatus('ok')
         } else {
-          setDbStatus('error')
-          setDbError(res.error || 'Unbekannter Fehler')
+          setDbStatus('setup')
+          setDbSetupError(res?.error || 'Verbindung fehlgeschlagen')
         }
       } catch (err) {
-        setDbStatus('error')
-        setDbError(err.message)
+        setDbStatus('setup')
+        setDbSetupError(err.message)
       }
     }
     init()
   }, [])
+
+  const handleDbSetup = async (e) => {
+    e.preventDefault()
+    setDbSetupLoading(true)
+    setDbSetupError('')
+    try {
+      const res = await window.electronAPI.dbConfigure(dbSetup)
+      if (res.success) {
+        const initRes = await window.electronAPI.init()
+        if (initRes && initRes.success) {
+          setDbStatus('ok')
+        } else {
+          setDbSetupError(initRes?.error || 'Initialisierung fehlgeschlagen')
+        }
+      } else {
+        setDbSetupError(res.error || 'Verbindung fehlgeschlagen')
+      }
+    } catch (err) {
+      setDbSetupError(err.message)
+    } finally {
+      setDbSetupLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (currentUser) {
@@ -118,15 +151,58 @@ export default function App() {
     return <div className="h-screen bg-gray-50" />
   }
 
-  if (dbStatus === 'error') {
+  if (dbStatus === 'setup') {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center max-w-md p-8 bg-white rounded-2xl shadow-lg">
-          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle size={24} className="text-red-500" />
+        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <Database size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Datenbankverbindung</h2>
+              <p className="text-sm text-gray-500">Einmalige Einrichtung</p>
+            </div>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Datenbankfehler</h2>
-          <p className="text-gray-500 text-sm">{dbError}</p>
+          <form onSubmit={handleDbSetup} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Server (Host)</label>
+              <input type="text" required value={dbSetup.host} onChange={e => setDbSetup(s => ({ ...s, host: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="z.B. 46.224.59.145" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Port</label>
+                <input type="text" value={dbSetup.port} onChange={e => setDbSetup(s => ({ ...s, port: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Datenbank</label>
+                <input type="text" value={dbSetup.database} onChange={e => setDbSetup(s => ({ ...s, database: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Benutzername</label>
+              <input type="text" value={dbSetup.user} onChange={e => setDbSetup(s => ({ ...s, user: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+              <input type="password" required value={dbSetup.password} onChange={e => setDbSetup(s => ({ ...s, password: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            {dbSetupError && (
+              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">
+                <AlertCircle size={16} /> {dbSetupError}
+              </div>
+            )}
+            <button type="submit" disabled={dbSetupLoading}
+              className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              {dbSetupLoading ? 'Verbinde...' : 'Verbinden & Speichern'}
+            </button>
+          </form>
         </div>
       </div>
     )
