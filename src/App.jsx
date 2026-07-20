@@ -31,6 +31,7 @@ export default function App() {
   const [dbSetup, setDbSetup] = useState({ host: '', port: '5432', user: 'postgres', password: '', database: 'postgres' })
   const [dbSetupLoading, setDbSetupLoading] = useState(false)
   const [dbSetupError, setDbSetupError] = useState('')
+  const [updateStatus, setUpdateStatus] = useState(null) // null | 'available' | 'ready'
 
   const loadContacts = useCallback(async (userId) => {
     const uid = userId || currentUser?.id
@@ -102,6 +103,11 @@ export default function App() {
       loadContacts(currentUser.id)
     }
   }, [currentUser])
+
+  useEffect(() => {
+    window.electronAPI?.onUpdateAvailable?.(() => setUpdateStatus('available'))
+    window.electronAPI?.onUpdateReady?.(() => setUpdateStatus('ready'))
+  }, [])
 
   const handleLogin = (user) => {
     setCurrentUser(user)
@@ -215,6 +221,20 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
       {platform === 'win32' && <WindowsTitleBar />}
+      {updateStatus === 'ready' && (
+        <div className="bg-green-600 text-white text-sm px-4 py-2 flex items-center justify-between z-50">
+          <span>Update bereit — App wird nach dem Neustart aktualisiert.</span>
+          <button onClick={() => window.electronAPI.installUpdate()} className="bg-white text-green-700 font-medium px-3 py-1 rounded-lg text-xs hover:bg-green-50 transition-colors">
+            Jetzt neu starten
+          </button>
+        </div>
+      )}
+      {updateStatus === 'available' && (
+        <div className="bg-blue-600 text-white text-sm px-4 py-2 flex items-center justify-between z-50">
+          <span>Update wird heruntergeladen...</span>
+          <button onClick={() => setUpdateStatus(null)} className="text-blue-200 hover:text-white text-xs">✕</button>
+        </div>
+      )}
       <div className="flex flex-1 overflow-hidden">
       <Sidebar
         contacts={contacts}

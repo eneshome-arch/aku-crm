@@ -26,6 +26,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   offersSave: (data) => ipcRenderer.invoke('offers:save', data),
   offersDelete: (offerId, userId) => ipcRenderer.invoke('offers:delete', offerId, userId),
   offersExportPdf: (data) => ipcRenderer.invoke('offers:exportPdf', data),
+  // Auto-Update
+  onUpdateAvailable: (cb) => ipcRenderer.on('update:available', cb),
+  onUpdateReady: (cb) => ipcRenderer.on('update:ready', cb),
+  installUpdate: () => ipcRenderer.invoke('update:install'),
   // DB Setup
   dbConfigure: (config) => ipcRenderer.invoke('db:configure', config),
   dbGetConfig: () => ipcRenderer.invoke('db:getConfig'),

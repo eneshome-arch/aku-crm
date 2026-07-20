@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, systemPreferences, dialog } = require('electron')
+const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const https = require('https')
 const http = require('http')
@@ -712,6 +713,24 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify()
+
+    autoUpdater.on('update-available', () => {
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win) win.webContents.send('update:available')
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win) win.webContents.send('update:ready')
+    })
+  }
+})
+
+ipcMain.handle('update:install', () => {
+  autoUpdater.quitAndInstall()
 })
 
 app.on('window-all-closed', () => {
