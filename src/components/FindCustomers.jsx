@@ -102,7 +102,9 @@ export default function FindCustomers({ userId, userLat, userLon, onAddContact, 
       setResults(parsed)
       if (parsed.length === 0) setError('Keine Ergebnisse gefunden.')
     } catch (e) {
-      setError(e.message || 'Fehler beim Laden der Daten.')
+      const msg = e.message || ''
+      const clean = msg.includes(': Error: ') ? msg.split(': Error: ').pop() : msg
+      setError(clean || 'Fehler beim Laden der Daten.')
     }
     setLoading(false)
   }
