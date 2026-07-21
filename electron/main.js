@@ -608,33 +608,51 @@ ipcMain.handle('campaigns:delete', async (event, campaignId) => {
   }
 })
 
-ipcMain.handle('fetch:overpass', async (_, query) => {
+const OVERPASS_SERVERS = [
+  'overpass-api.de',
+  'overpass.kumi.systems',
+  'maps.mail.ru',
+]
+const OVERPASS_PATHS = {
+  'overpass-api.de': '/api/interpreter',
+  'overpass.kumi.systems': '/api/interpreter',
+  'maps.mail.ru': '/osm/tools/overpass/api/interpreter',
+}
+
+function queryOverpassServer(hostname, query) {
   return new Promise((resolve, reject) => {
     const body = Buffer.from(query)
     const req = https.request({
-      hostname: 'overpass-api.de',
-      path: '/api/interpreter',
+      hostname,
+      path: OVERPASS_PATHS[hostname],
       method: 'POST',
       headers: { 'Content-Type': 'text/plain', 'Content-Length': body.length, 'User-Agent': 'AkuCRM/1.0' },
-      timeout: 30000,
+      timeout: 25000,
     }, (res) => {
       let data = ''
       res.on('data', chunk => data += chunk)
       res.on('end', () => {
-        const ct = res.headers['content-type'] || ''
-        if (!ct.includes('json') && data.trim().startsWith('<')) {
-          reject(new Error('Overpass API nicht erreichbar. Bitte später erneut versuchen.'))
-          return
-        }
+        if (data.trim().startsWith('<')) { reject(new Error('HTML')); return }
         try { resolve(JSON.parse(data)) }
-        catch { reject(new Error('Ungültige Antwort vom Server.')) }
+        catch { reject(new Error('JSON')) }
       })
     })
-    req.on('error', (e) => reject(new Error('Netzwerkfehler: ' + e.message)))
-    req.on('timeout', () => { req.destroy(); reject(new Error('Zeitüberschreitung. Bitte erneut versuchen.')) })
+    req.on('error', reject)
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')) })
     req.write(body)
     req.end()
   })
+}
+
+ipcMain.handle('fetch:overpass', async (_, query) => {
+  for (const server of OVERPASS_SERVERS) {
+    try {
+      return await queryOverpassServer(server, query)
+    } catch {
+      // nächsten Server versuchen
+    }
+  }
+  throw new Error('Kunden suchen ist gerade nicht verfügbar. Bitte Internetverbindung prüfen und erneut versuchen.')
 })
 
 ipcMain.handle('fetch:extract', async (event, url) => {
