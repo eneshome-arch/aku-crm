@@ -4,6 +4,19 @@ Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Mark
 
 ---
 
+## Download
+
+**[→ Neueste Version herunterladen](https://github.com/eneshome-arch/aku-crm/releases/latest)**
+
+| System | Datei |
+|---|---|
+| Mac (M1/M2/M3) | `Aku CRM-1.0.0-arm64.dmg` |
+| Mac (Intel) | `Aku CRM-1.0.0.dmg` |
+
+> **Erster Start:** Rechtsklick → Öffnen, dann in Systemeinstellungen → Datenschutz & Sicherheit → „Trotzdem öffnen"
+
+---
+
 ## Technik
 
 | | |
@@ -11,7 +24,7 @@ Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Mark
 | Frontend | React + Vite + Tailwind CSS |
 | Backend | Electron (Main Process) |
 | Datenbank | PostgreSQL (Remote-Server) |
-| Build | `npx vite build` → `app.asar` |
+| Updates | electron-updater (automatisch via GitHub Releases) |
 
 ---
 
@@ -23,38 +36,33 @@ aku-crm/
 │   ├── main.js          # Electron Main Process, alle IPC-Handler, DB-Verbindung
 │   └── preload.js       # contextBridge – exposte API ans Frontend
 ├── src/
-│   ├── App.jsx          # Root-Komponente, View-Routing, globaler State
+│   ├── App.jsx          # Root-Komponente, View-Routing, Dark Mode, globaler State
 │   ├── main.jsx         # React-Einstiegspunkt
-│   ├── index.css        # Tailwind-Basis
+│   ├── index.css        # Tailwind-Basis + Dark Mode CSS
 │   └── components/
 │       ├── AngeboteModule.jsx     # Angebote erstellen, bearbeiten, PDF-Export
+│       ├── Settings.jsx           # Einstellungen (Profil, Dark Mode, Sprache, Benachrichtigungen, E-Mail)
 │       ├── Sidebar.jsx            # Navigation + Kontaktliste
 │       ├── Dashboard.jsx          # Übersicht, Statistiken
 │       ├── ContactProfile.jsx     # Kontakt-Detailansicht
 │       ├── ContactForm.jsx        # Kontakt anlegen / bearbeiten
 │       ├── CallList.jsx           # Anruflisten-Auswahl
 │       ├── CallSession.jsx        # Aktive Anrufsession
-│       ├── FindCustomers.jsx      # Kundensuche via Overpass/Maps
+│       ├── FindCustomers.jsx      # Kundensuche via Overpass API (3 Fallback-Server)
 │       ├── EmailMarketing.jsx     # E-Mail-Kampagnen
-│       ├── EmailTemplateBuilder.jsx
-│       ├── EmailSettings.jsx
-│       ├── RichEditor.jsx
-│       ├── AdminPanel.jsx
-│       ├── AdminUserDetail.jsx
-│       ├── Settings.jsx
-│       ├── Login.jsx
-│       └── WindowsTitleBar.jsx
+│       ├── AdminPanel.jsx         # Benutzerverwaltung
+│       ├── Login.jsx              # Login + Touch ID
+│       └── WindowsTitleBar.jsx    # Windows Titelleiste
 ├── assets/
 │   └── icon.icns
-├── index.html
-├── vite.config.js
-├── tailwind.config.js
+├── config.json          # DB-Zugangsdaten (nicht in Git, wird ins DMG eingebettet)
+├── .env.example         # Vorlage für Entwickler
 └── package.json
 ```
 
 ---
 
-## Module / Features
+## Features
 
 ### CRM Akquise
 - Kontaktverwaltung mit Status-Tracking (10 Stufen: Nicht kontaktiert → Aktiver Kunde)
@@ -63,16 +71,16 @@ aku-crm/
 - Aktivitätslog pro Kontakt
 - CSV-Import / Export
 - Dokumentenanhänge pro Kontakt
-- Kundensuche via OpenStreetMap / Overpass API
+- Kundensuche via OpenStreetMap / Overpass API (mit 3 Fallback-Servern)
 
 ### E-Mail Marketing
 - Kampagnen mit Rich-Text-Editor (HTML)
 - SMTP-Versand direkt aus der App (via Nodemailer)
-- Kampagnen-Ergebnisse (Erfolg / Fehler) werden gespeichert
+- Kampagnen-Ergebnisse werden gespeichert
 
-### Angebote (`AngeboteModule.jsx`)
+### Angebote
 - Angebotsliste mit Status (Entwurf, Verschickt, Angenommen, Abgelehnt)
-- **Einrichtungstyp-Auswahl** – passt Betreff, Texte und Stundensätze automatisch an:
+- **Einrichtungstyp-Auswahl** – passt Texte und Stundensätze automatisch an:
   - 🏠 Pflegeheim / Seniorenzentrum
   - 🏥 Krankenhaus / Klinik
   - 🚗 Ambulanter Pflegedienst
@@ -80,19 +88,28 @@ aku-crm/
   - 🧠 Psychiatrie / Sozialpsychiatrie
   - ♿ Behinderteneinrichtung / Eingliederungshilfe
 - Empfänger aus CRM-Kontakten auswählen (Auto-Fill)
-- Alle Texte individuell anpassbar (Betreff, Einleitung, Unternehmensvorstellung, Vorteilsbox)
-- Bearbeitbare Preistabelle (Qualifikation, Einsatzbereich, Stundensatz)
-- Live-Vorschau (iframe, A4-skaliert)
-- PDF-Export via Electron `printToPDF` → Speicherdialog → direkt geöffnet
-- Angebote werden in PostgreSQL-Datenbank gespeichert (`offers`-Tabelle)
+- Live-Vorschau (A4-skaliert)
+- PDF-Export via Electron `printToPDF`
+
+### Einstellungen
+- **Profilbild** hochladen (lokal gespeichert)
+- **Dark Mode** – dunkles Design
+- **Sprache** – Deutsch, English, Türkçe
+- **Benachrichtigungen** – Follow-ups, E-Mail, Ton
+- **E-Mail Konto** – SMTP-Konfiguration (Outlook, Gmail, GMX etc.)
 
 ### Admin
 - Benutzerverwaltung (Passwort zurücksetzen, löschen)
 - Touch ID Login (macOS)
 
+### Automatische Updates
+- App prüft beim Start ob eine neue Version verfügbar ist
+- Download läuft im Hintergrund
+- Banner zeigt Update-Status, Neustart installiert die neue Version
+
 ---
 
-## Datenbank-Schema (wichtigste Tabellen)
+## Datenbank-Schema
 
 | Tabelle | Inhalt |
 |---|---|
@@ -105,31 +122,37 @@ aku-crm/
 
 ---
 
-## Build & Deploy
+## Entwicklung
 
-### Entwicklung
 ```bash
+# Abhängigkeiten installieren
 npm install
-npx vite build
+
+# .env anlegen (nach .env.example)
+cp .env.example .env
+
+# Dev-Modus (Vite + Electron gleichzeitig, Hot Reload)
+npm run dev
+
+# Produktion bauen + DMG erstellen
+npm run dist
 ```
 
-### In App einspielen (macOS)
-```bash
-# 1. Frontend bauen
-npx vite build
-
-# 2. Staging-Ordner vorbereiten
-mkdir -p /tmp/aku-stage
-cp package.json /tmp/aku-stage/
-cp -r electron dist /tmp/aku-stage/
-cp -r /tmp/aku-orig/node_modules /tmp/aku-stage/   # prod node_modules aus installierter App
-
-# 3. asar packen
-npx @electron/asar pack /tmp/aku-stage /tmp/app_new.asar
-
-# 4. Einspielen (benötigt sudo)
-sudo cp /tmp/app_new.asar /Applications/Aku.app/Contents/Resources/app.asar
-```
+### Neue Version veröffentlichen
+1. Version in `package.json` erhöhen (z.B. `1.0.1`)
+2. `npm run dist` ausführen
+3. Apps ad-hoc signieren:
+   ```bash
+   codesign --deep --force --sign - "dist/mac-arm64/Aku CRM.app"
+   codesign --deep --force --sign - "dist/mac/Aku CRM.app"
+   ```
+4. DMGs neu erstellen:
+   ```bash
+   hdiutil create -volname "Aku CRM" -srcfolder "dist/mac-arm64/Aku CRM.app" -ov -format UDZO "dist/Aku CRM-1.0.1-arm64.dmg"
+   hdiutil create -volname "Aku CRM" -srcfolder "dist/mac/Aku CRM.app" -ov -format UDZO "dist/Aku CRM-1.0.1.dmg"
+   ```
+5. GitHub Release erstellen und DMGs + `latest-mac.yml` + `.blockmap` hochladen
+6. Alle Nutzer bekommen das Update automatisch beim nächsten App-Start
 
 ---
 
@@ -139,17 +162,3 @@ sudo cp /tmp/app_new.asar /Applications/Aku.app/Contents/Resources/app.asar
 |---|---|
 | Admin E-Mail | `admin@aku.app` |
 | Admin Passwort | `aku-admin-2024` |
-
----
-
-## Angebot-Vorlage (Zeitblick Personalservice)
-
-Das Angebot-PDF basiert auf dem Zeitblick Corporate Design:
-- Dunkler Header (`#0f172a`) mit Logo
-- Blauer Akzentstreifen (Gradient `#3b82f6 → #06b6d4`)
-- Inter-Font, A4-Format
-- Zuschläge (Überstunden +25%, Nacht +35%, Sonntag +60%, Feiertag +110%)
-- Zahlungsziel 14 Tage netto
-- Unterzeichner: Tasdemir, Geschäftsführer
-
-Die HTML-Vorlage wird dynamisch in `AngeboteModule.jsx` via `generateHTML(offer)` gerendert und per `printToPDF` exportiert.

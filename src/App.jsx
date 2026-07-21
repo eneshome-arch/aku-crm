@@ -32,6 +32,8 @@ export default function App() {
   const [dbSetupLoading, setDbSetupLoading] = useState(false)
   const [dbSetupError, setDbSetupError] = useState('')
   const [updateStatus, setUpdateStatus] = useState(null) // null | 'available' | 'ready'
+  const [darkMode, setDarkMode] = useState(false)
+  const [language, setLanguage] = useState('de')
 
   const loadContacts = useCallback(async (userId) => {
     const uid = userId || currentUser?.id
@@ -108,6 +110,27 @@ export default function App() {
     window.electronAPI?.onUpdateAvailable?.(() => setUpdateStatus('available'))
     window.electronAPI?.onUpdateReady?.(() => setUpdateStatus('ready'))
   }, [])
+
+  useEffect(() => {
+    async function loadPrefs() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.darkMode) { setDarkMode(true); document.documentElement.classList.add('dark') }
+      if (s?.language) setLanguage(s.language)
+    }
+    loadPrefs()
+  }, [])
+
+  const handleSetDarkMode = (val) => {
+    setDarkMode(val)
+    window.electronAPI?.setSetting?.('darkMode', val)
+    if (val) document.documentElement.classList.add('dark')
+    else document.documentElement.classList.remove('dark')
+  }
+
+  const handleSetLanguage = (val) => {
+    setLanguage(val)
+    window.electronAPI?.setSetting?.('language', val)
+  }
 
   const handleLogin = (user) => {
     setCurrentUser(user)
@@ -272,6 +295,10 @@ export default function App() {
             currentUser={currentUser}
             onProfileUpdated={handleProfileUpdated}
             onLogout={handleLogout}
+            darkMode={darkMode}
+            onSetDarkMode={handleSetDarkMode}
+            language={language}
+            onSetLanguage={handleSetLanguage}
           />
         )}
         {view === 'admin' && currentUser?.is_admin && <AdminPanel />}

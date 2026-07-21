@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown, User, MapPin, LogOut } from 'lucide-react'
+import { Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown, User, MapPin, LogOut, Moon, Sun, Bell, Globe, Camera } from 'lucide-react'
 
 const PROVIDERS = [
   { label: 'Microsoft Outlook / Hotmail', value: 'outlook', host: 'smtp-mail.outlook.com', port: 587 },
@@ -18,6 +18,17 @@ function Field({ label, children }) {
       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{label}</label>
       {children}
     </div>
+  )
+}
+
+function Toggle({ value, onChange }) {
+  return (
+    <button
+      onClick={() => onChange(!value)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${value ? 'bg-blue-500' : 'bg-gray-200'}`}
+    >
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
+    </button>
   )
 }
 
@@ -97,8 +108,30 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
   const [birthdate, setBirthdate] = useState(
     currentUser?.birthdate ? currentUser.birthdate.substring(0, 10) : ''
   )
+  const [avatar, setAvatar] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const fileRef = useRef(null)
+
+  useEffect(() => {
+    async function loadAvatar() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.[`avatar_${currentUser?.id}`]) setAvatar(s[`avatar_${currentUser?.id}`])
+    }
+    loadAvatar()
+  }, [currentUser?.id])
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const b64 = ev.target.result
+      setAvatar(b64)
+      window.electronAPI?.setSetting?.(`avatar_${currentUser?.id}`, b64)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -127,11 +160,37 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
         </div>
         <div>
           <h2 className="text-lg font-bold text-gray-900">Mein Profil</h2>
-          <p className="text-sm text-gray-500">Name und Standort für die Kundensuche</p>
+          <p className="text-sm text-gray-500">Name, Foto und Standort</p>
         </div>
       </div>
 
       <div className="max-w-lg">
+        {/* Profilbild */}
+        <div className="mb-6 flex items-center gap-4">
+          <div className="relative">
+            {avatar
+              ? <img src={avatar} alt="Profilbild" className="w-20 h-20 rounded-2xl object-cover" />
+              : <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center">
+                  <User size={32} className="text-gray-400" />
+                </div>
+            }
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors"
+            >
+              <Camera size={13} />
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-800">{name || 'Kein Name'}</p>
+            <p className="text-xs text-gray-400">{currentUser?.email}</p>
+            <button onClick={() => fileRef.current?.click()} className="text-xs text-blue-500 hover:underline mt-1">
+              Foto ändern
+            </button>
+          </div>
+        </div>
+
         <Field label="Name">
           <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Dein Name" className={inputClass} />
         </Field>
@@ -329,12 +388,140 @@ function EmailSection({ currentUser, onProfileUpdated }) {
   )
 }
 
+function AppearanceSection({ darkMode, onSetDarkMode }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+          {darkMode ? <Moon size={20} className="text-gray-600" /> : <Sun size={20} className="text-yellow-500" />}
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Erscheinungsbild</h2>
+          <p className="text-sm text-gray-500">Helligkeit und Design anpassen</p>
+        </div>
+      </div>
+
+      <div className="max-w-lg space-y-4">
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div>
+            <p className="text-sm font-semibold text-gray-800">Dark Mode</p>
+            <p className="text-xs text-gray-500 mt-0.5">Dunkles Design für die Augen</p>
+          </div>
+          <Toggle value={darkMode} onChange={onSetDarkMode} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LanguageSection({ language, onSetLanguage }) {
+  const LANGUAGES = [
+    { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
+    { value: 'en', label: 'English', flag: '🇬🇧' },
+    { value: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  ]
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+          <Globe size={20} className="text-green-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Sprache</h2>
+          <p className="text-sm text-gray-500">Anzeigesprache der App</p>
+        </div>
+      </div>
+
+      <div className="max-w-lg space-y-2">
+        {LANGUAGES.map(lang => (
+          <button
+            key={lang.value}
+            onClick={() => onSetLanguage(lang.value)}
+            className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-colors text-left ${
+              language === lang.value
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-transparent bg-gray-50 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-2xl">{lang.flag}</span>
+            <span className={`text-sm font-semibold ${language === lang.value ? 'text-blue-700' : 'text-gray-800'}`}>
+              {lang.label}
+            </span>
+            {language === lang.value && <CheckCircle size={16} className="ml-auto text-blue-500" />}
+          </button>
+        ))}
+        <p className="text-xs text-gray-400 pt-2 pl-1">Die vollständige Übersetzung wird schrittweise eingeführt.</p>
+      </div>
+    </div>
+  )
+}
+
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState({
+    followup: true,
+    newContact: false,
+    email: true,
+    sound: true,
+  })
+
+  useEffect(() => {
+    async function load() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.notifications) setPrefs(p => ({ ...p, ...s.notifications }))
+    }
+    load()
+  }, [])
+
+  const toggle = (key) => {
+    const next = { ...prefs, [key]: !prefs[key] }
+    setPrefs(next)
+    window.electronAPI?.setSetting?.('notifications', next)
+  }
+
+  const items = [
+    { key: 'followup', label: 'Follow-up Erinnerungen', desc: 'Benachrichtigung wenn ein Follow-up fällig ist' },
+    { key: 'newContact', label: 'Neuer Kontakt', desc: 'Benachrichtigung wenn ein Kontakt hinzugefügt wird' },
+    { key: 'email', label: 'E-Mail Versand', desc: 'Benachrichtigung nach erfolgreichem E-Mail Versand' },
+    { key: 'sound', label: 'Ton', desc: 'Benachrichtigungston aktivieren' },
+  ]
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+          <Bell size={20} className="text-orange-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Benachrichtigungen</h2>
+          <p className="text-sm text-gray-500">Wähle welche Benachrichtigungen du erhalten möchtest</p>
+        </div>
+      </div>
+
+      <div className="max-w-lg space-y-3">
+        {items.map(item => (
+          <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+            </div>
+            <Toggle value={prefs[item.key]} onChange={() => toggle(item.key)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const NAV_ITEMS = [
   { id: 'profile', label: 'Mein Profil', icon: User },
+  { id: 'appearance', label: 'Erscheinungsbild', icon: Sun },
+  { id: 'language', label: 'Sprache', icon: Globe },
+  { id: 'notifications', label: 'Benachrichtigungen', icon: Bell },
   { id: 'email', label: 'E-Mail Konto', icon: Mail },
 ]
 
-export default function Settings({ currentUser, onProfileUpdated, onLogout }) {
+export default function Settings({ currentUser, onProfileUpdated, onLogout, darkMode, onSetDarkMode, language, onSetLanguage }) {
   const [activeSection, setActiveSection] = useState('profile')
 
   return (
@@ -378,6 +565,15 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout }) {
       <div className="flex-1 overflow-y-auto p-8 pt-12">
         {activeSection === 'profile' && (
           <ProfileSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
+        )}
+        {activeSection === 'appearance' && (
+          <AppearanceSection darkMode={darkMode} onSetDarkMode={onSetDarkMode} />
+        )}
+        {activeSection === 'language' && (
+          <LanguageSection language={language} onSetLanguage={onSetLanguage} />
+        )}
+        {activeSection === 'notifications' && (
+          <NotificationsSection />
         )}
         {activeSection === 'email' && (
           <EmailSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
