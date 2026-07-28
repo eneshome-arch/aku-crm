@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown, User, MapPin, LogOut, Moon, Sun, Bell, Globe, Camera } from 'lucide-react'
+import { Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown, User, MapPin, LogOut, Moon, Sun, Bell, Globe, Camera, Building2, Phone, Database, Upload, ArrowUp, ArrowDown, X, Plus, HardDrive, FileText } from 'lucide-react'
 
 const PROVIDERS = [
   { label: 'Microsoft Outlook / Hotmail', value: 'outlook', host: 'smtp-mail.outlook.com', port: 587 },
@@ -7,6 +7,8 @@ const PROVIDERS = [
   { label: 'Gmail', value: 'gmail', host: 'smtp.gmail.com', port: 587, hint: 'Bei Gmail ein App-Passwort unter myaccount.google.com → Sicherheit erstellen.' },
   { label: 'GMX', value: 'gmx', host: 'mail.gmx.net', port: 587 },
   { label: 'Web.de', value: 'webde', host: 'smtp.web.de', port: 587 },
+  { label: 'Strato', value: 'strato', host: 'smtp.strato.de', port: 465, secure: true },
+  { label: 'IONOS / 1&1', value: 'ionos', host: 'smtp.1und1.de', port: 587 },
   { label: 'Eigener SMTP-Server', value: 'custom', host: '', port: 587 },
 ]
 
@@ -239,6 +241,394 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
   )
 }
 
+function CompanySection() {
+  const [data, setData] = useState({
+    firmenname: '',
+    logo: null,
+    akzentfarbe: '#1e40af',
+    adresse: '',
+    plz: '',
+    stadt: '',
+    telefon: '',
+    email: '',
+    website: '',
+    ustIdNr: '',
+    steuernummer: '',
+    kontoinhaber: '',
+    bank: '',
+    iban: '',
+    bic: '',
+    footerText: '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const logoRef = useRef(null)
+
+  useEffect(() => {
+    async function load() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.companyProfile) setData(d => ({ ...d, ...s.companyProfile }))
+    }
+    load()
+  }, [])
+
+  const set = (field) => (e) => setData(d => ({ ...d, [field]: e.target.value }))
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setData(d => ({ ...d, logo: ev.target.result }))
+    reader.readAsDataURL(file)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    await window.electronAPI?.setSetting?.('companyProfile', data)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Building2 size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Firmenprofil</h2>
+            <p className="text-sm text-gray-500">Für Rechnungen, Angebote und PDFs</p>
+          </div>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={`px-5 py-2 text-sm font-bold rounded-xl transition-all flex items-center gap-2 ${
+            saved ? 'bg-green-500 text-white' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white'
+          }`}
+        >
+          {saved ? <><CheckCircle size={14} /> Gespeichert!</> : saving ? 'Speichern...' : 'Speichern'}
+        </button>
+      </div>
+
+      <div className="max-w-2xl space-y-8">
+        {/* FIRMENIDENTITÄT */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Firmenidentität</h3>
+          <Field label="Firmenname">
+            <input type="text" value={data.firmenname} onChange={set('firmenname')} placeholder="Musterfirma GmbH" className={inputClass} />
+          </Field>
+          <Field label="Logo">
+            <div className="flex items-center gap-4">
+              {data.logo && (
+                <img src={data.logo} alt="Logo" className="w-16 h-16 rounded-xl object-contain bg-gray-50 border border-gray-200" />
+              )}
+              <button
+                onClick={() => logoRef.current?.click()}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-colors flex items-center gap-2"
+              >
+                <Upload size={14} /> Logo auswählen
+              </button>
+              <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+            </div>
+          </Field>
+          <Field label="Akzentfarbe">
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={data.akzentfarbe}
+                onChange={set('akzentfarbe')}
+                className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+              />
+              <input
+                type="text"
+                value={data.akzentfarbe}
+                onChange={set('akzentfarbe')}
+                placeholder="#1e40af"
+                className={inputClass + ' max-w-[140px]'}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">Wird für Tabellenköpfe und Akzente im PDF verwendet</p>
+          </Field>
+        </div>
+
+        {/* KONTAKTINFORMATIONEN */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Kontaktinformationen</h3>
+          <div className="grid grid-cols-4 gap-3 mb-5">
+            <div className="col-span-3">
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
+              <input type="text" value={data.adresse} onChange={set('adresse')} placeholder="Musterstraße 1" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">PLZ</label>
+              <input type="text" value={data.plz} onChange={set('plz')} placeholder="30159" className={inputClass} />
+            </div>
+          </div>
+          <Field label="Stadt">
+            <input type="text" value={data.stadt} onChange={set('stadt')} placeholder="Hannover" className={inputClass} />
+          </Field>
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Telefon</label>
+              <input type="text" value={data.telefon} onChange={set('telefon')} placeholder="+49 511 123456" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">E-Mail</label>
+              <input type="email" value={data.email} onChange={set('email')} placeholder="info@firma.de" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Website</label>
+              <input type="text" value={data.website} onChange={set('website')} placeholder="www.firma.de" className={inputClass} />
+            </div>
+          </div>
+        </div>
+
+        {/* STEUER & RECHTLICHES */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Steuer & Rechtliches</h3>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">UST-IDNr.</label>
+              <input type="text" value={data.ustIdNr} onChange={set('ustIdNr')} placeholder="DE123456789" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Steuernummer</label>
+              <input type="text" value={data.steuernummer} onChange={set('steuernummer')} placeholder="12/345/67890" className={inputClass} />
+            </div>
+          </div>
+        </div>
+
+        {/* BANKVERBINDUNG */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Bankverbindung</h3>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kontoinhaber</label>
+              <input type="text" value={data.kontoinhaber} onChange={set('kontoinhaber')} placeholder="Max Mustermann" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bank</label>
+              <input type="text" value={data.bank} onChange={set('bank')} placeholder="Sparkasse Hannover" className={inputClass} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">IBAN</label>
+              <input type="text" value={data.iban} onChange={set('iban')} placeholder="DE89 3704 0044 0532 0130 00" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">BIC</label>
+              <input type="text" value={data.bic} onChange={set('bic')} placeholder="COBADEFFXXX" className={inputClass} />
+            </div>
+          </div>
+        </div>
+
+        {/* FUSSZEILE / SONSTIGES */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Fusszeile / Sonstiges</h3>
+          <Field label="Footer-Text">
+            <textarea
+              value={data.footerText}
+              onChange={set('footerText')}
+              placeholder="z.B. Vielen Dank für Ihr Vertrauen!"
+              rows={3}
+              className={inputClass + ' resize-none'}
+            />
+          </Field>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CallsSection() {
+  const [numberPriority, setNumberPriority] = useState([
+    'Telefon Zentrale',
+    'Telefon Direkt',
+    'Mobil',
+  ])
+  const [vorwahl, setVorwahl] = useState('')
+  const [callResults, setCallResults] = useState([
+    'Nicht erreicht',
+    'Rückruf vereinbart',
+    'Kein Interesse',
+    'Interesse vorhanden',
+    'Unterlagen angefordert',
+    'Ansprechpartner ermittelt',
+    'Voicemail hinterlassen',
+  ])
+  const [newResult, setNewResult] = useState('')
+  const [script, setScript] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    async function load() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.callSettings) {
+        const cs = s.callSettings
+        if (cs.numberPriority) setNumberPriority(cs.numberPriority)
+        if (cs.vorwahl !== undefined) setVorwahl(cs.vorwahl)
+        if (cs.callResults) setCallResults(cs.callResults)
+        if (cs.script !== undefined) setScript(cs.script)
+      }
+    }
+    load()
+  }, [])
+
+  const saveAll = async (overrides = {}) => {
+    const data = {
+      numberPriority,
+      vorwahl,
+      callResults,
+      script,
+      ...overrides,
+    }
+    await window.electronAPI?.setSetting?.('callSettings', data)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  const moveItem = (index, direction) => {
+    const newList = [...numberPriority]
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= newList.length) return
+    ;[newList[index], newList[targetIndex]] = [newList[targetIndex], newList[index]]
+    setNumberPriority(newList)
+    saveAll({ numberPriority: newList })
+  }
+
+  const removeResult = (index) => {
+    const next = callResults.filter((_, i) => i !== index)
+    setCallResults(next)
+    saveAll({ callResults: next })
+  }
+
+  const addResult = () => {
+    if (!newResult.trim()) return
+    const next = [...callResults, newResult.trim()]
+    setCallResults(next)
+    setNewResult('')
+    saveAll({ callResults: next })
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+          <Phone size={20} className="text-green-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Anrufe</h2>
+          <p className="text-sm text-gray-500">Einstellungen für Anruf-Sessions</p>
+        </div>
+      </div>
+
+      <div className="max-w-lg space-y-8">
+        {/* NUMMERPRIORITÄT */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Nummerpriorität</h3>
+          <div className="space-y-2">
+            {numberPriority.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <span className="text-xs font-bold text-gray-400 w-5">{i + 1}.</span>
+                <span className="text-sm font-medium text-gray-800 flex-1">{item}</span>
+                <button
+                  onClick={() => moveItem(i, -1)}
+                  disabled={i === 0}
+                  className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
+                >
+                  <ArrowUp size={14} />
+                </button>
+                <button
+                  onClick={() => moveItem(i, 1)}
+                  disabled={i === numberPriority.length - 1}
+                  className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
+                >
+                  <ArrowDown size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-2">Welche Nummer wird zuerst angewählt, wenn mehrere hinterlegt sind.</p>
+        </div>
+
+        {/* AUTOMATISCHE VORWAHL */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Automatische Vorwahl</h3>
+          <input
+            type="text"
+            value={vorwahl}
+            onChange={e => setVorwahl(e.target.value)}
+            placeholder="z.B. +49 oder leer lassen"
+            className={inputClass}
+            onBlur={() => saveAll()}
+          />
+          <p className="text-xs text-gray-400 mt-1.5">Wird vor jede Nummer gesetzt, falls nicht schon enthalten (z.B. +49 oder 0049).</p>
+        </div>
+
+        {/* ANRUF-ERGEBNISSE */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Anruf-Ergebnisse</h3>
+          <p className="text-xs text-gray-400 mb-3">Schnellauswahl-Optionen in der Anruf-Session.</p>
+          <div className="space-y-2 mb-3">
+            {callResults.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl group">
+                <span className="text-sm text-gray-800 flex-1">{item}</span>
+                <button
+                  onClick={() => removeResult(i)}
+                  className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newResult}
+              onChange={e => setNewResult(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addResult()}
+              placeholder="Neues Ergebnis..."
+              className={inputClass}
+            />
+            <button
+              onClick={addResult}
+              disabled={!newResult.trim()}
+              className="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap"
+            >
+              <Plus size={14} /> Hinzufügen
+            </button>
+          </div>
+        </div>
+
+        {/* ANRUF-SKRIPT */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Anruf-Skript</h3>
+          <p className="text-xs text-gray-400 mb-3">Dein persönliches Gesprächsskript für Anruf-Sessions.</p>
+          <textarea
+            value={script}
+            onChange={e => setScript(e.target.value)}
+            onBlur={() => saveAll()}
+            placeholder="Guten Tag, mein Name ist ... Ich rufe an wegen ..."
+            rows={5}
+            className={inputClass + ' resize-none'}
+          />
+        </div>
+
+        {saved && (
+          <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+            <CheckCircle size={15} /> Gespeichert!
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function EmailSection({ currentUser, onProfileUpdated }) {
   const [provider, setProvider] = useState('outlook')
   const [config, setConfig] = useState({ host: 'smtp-mail.outlook.com', port: 587, email: '', password: '', senderName: '' })
@@ -393,21 +783,73 @@ function AppearanceSection({ darkMode, onSetDarkMode }) {
     <div className="bg-white rounded-2xl shadow-sm p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-          {darkMode ? <Moon size={20} className="text-gray-600" /> : <Sun size={20} className="text-yellow-500" />}
+          <Sun size={20} className="text-yellow-500" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Erscheinungsbild</h2>
-          <p className="text-sm text-gray-500">Helligkeit und Design anpassen</p>
+          <h2 className="text-lg font-bold text-gray-900">Darstellung</h2>
+          <p className="text-sm text-gray-500">Wähle zwischen hellem und dunklem Design.</p>
         </div>
       </div>
 
-      <div className="max-w-lg space-y-4">
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-          <div>
-            <p className="text-sm font-semibold text-gray-800">Dark Mode</p>
-            <p className="text-xs text-gray-500 mt-0.5">Dunkles Design für die Augen</p>
-          </div>
-          <Toggle value={darkMode} onChange={onSetDarkMode} />
+      <div className="max-w-lg">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Hell Card */}
+          <button
+            onClick={() => onSetDarkMode(false)}
+            className={`relative rounded-2xl border-2 p-4 transition-all text-left ${
+              !darkMode ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300 bg-white'
+            }`}
+          >
+            {/* Radio dot */}
+            <div className={`absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              !darkMode ? 'border-blue-500' : 'border-gray-300'
+            }`}>
+              {!darkMode && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+            </div>
+            {/* Preview mockup */}
+            <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 bg-white p-3">
+              <div className="h-2 w-12 bg-gray-200 rounded mb-2" />
+              <div className="h-1.5 w-20 bg-gray-100 rounded mb-3" />
+              <div className="space-y-1.5">
+                <div className="h-1.5 w-full bg-gray-100 rounded" />
+                <div className="h-1.5 w-3/4 bg-gray-100 rounded" />
+                <div className="h-1.5 w-5/6 bg-gray-100 rounded" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sun size={14} className="text-yellow-500" />
+              <span className={`text-sm font-semibold ${!darkMode ? 'text-blue-700' : 'text-gray-700'}`}>Hell</span>
+            </div>
+          </button>
+
+          {/* Dunkel Card */}
+          <button
+            onClick={() => onSetDarkMode(true)}
+            className={`relative rounded-2xl border-2 p-4 transition-all text-left ${
+              darkMode ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300 bg-white'
+            }`}
+          >
+            {/* Radio dot */}
+            <div className={`absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              darkMode ? 'border-blue-500' : 'border-gray-300'
+            }`}>
+              {darkMode && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+            </div>
+            {/* Preview mockup */}
+            <div className="mb-3 rounded-xl overflow-hidden border border-gray-700 bg-gray-800 p-3">
+              <div className="h-2 w-12 bg-gray-600 rounded mb-2" />
+              <div className="h-1.5 w-20 bg-gray-700 rounded mb-3" />
+              <div className="space-y-1.5">
+                <div className="h-1.5 w-full bg-gray-700 rounded" />
+                <div className="h-1.5 w-3/4 bg-gray-700 rounded" />
+                <div className="h-1.5 w-5/6 bg-gray-700 rounded" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Moon size={14} className="text-gray-400" />
+              <span className={`text-sm font-semibold ${darkMode ? 'text-blue-700' : 'text-gray-700'}`}>Dunkel</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -513,16 +955,218 @@ function NotificationsSection() {
   )
 }
 
+function BackupSection() {
+  const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [backingUp, setBackingUp] = useState(false)
+  const [status, setStatus] = useState(null)
+  const importRef = useRef(null)
+
+  const handleCsvExport = async () => {
+    setExporting(true)
+    setStatus(null)
+    try {
+      const rows = await window.electronAPI?.query?.('SELECT * FROM contacts')
+      if (!rows || rows.length === 0) {
+        setStatus({ type: 'warn', msg: 'Keine Kontakte zum Exportieren vorhanden.' })
+        setExporting(false)
+        return
+      }
+      const headers = Object.keys(rows[0])
+      const csvContent = [
+        headers.join(';'),
+        ...rows.map(row => headers.map(h => {
+          let val = row[h] ?? ''
+          val = String(val).replace(/"/g, '""')
+          return `"${val}"`
+        }).join(';'))
+      ].join('\n')
+
+      // Use BOM for Excel compatibility
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `kontakte_export_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      setStatus({ type: 'success', msg: 'CSV-Export erfolgreich!' })
+    } catch (err) {
+      console.error('CSV Export error:', err)
+      setStatus({ type: 'error', msg: 'Fehler beim Export: ' + err.message })
+    }
+    setExporting(false)
+  }
+
+  const handleCsvImport = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setImporting(true)
+    setStatus(null)
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').filter(l => l.trim())
+      if (lines.length < 2) {
+        setStatus({ type: 'warn', msg: 'CSV-Datei ist leer oder enthält nur Header.' })
+        setImporting(false)
+        return
+      }
+      const headers = lines[0].split(';').map(h => h.replace(/"/g, '').trim())
+      let imported = 0
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(';').map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"').trim())
+        const row = {}
+        headers.forEach((h, idx) => { row[h] = values[idx] || '' })
+        if (row.firma || row.name || row.email) {
+          const cols = Object.keys(row).filter(k => k !== 'id')
+          const vals = cols.map(k => row[k])
+          const placeholders = cols.map(() => '?').join(', ')
+          await window.electronAPI?.query?.(
+            `INSERT INTO contacts (${cols.join(', ')}) VALUES (${placeholders})`,
+            vals
+          )
+          imported++
+        }
+      }
+      setStatus({ type: 'success', msg: `${imported} Kontakte importiert!` })
+    } catch (err) {
+      console.error('CSV Import error:', err)
+      setStatus({ type: 'error', msg: 'Fehler beim Import: ' + err.message })
+    }
+    setImporting(false)
+    if (importRef.current) importRef.current.value = ''
+  }
+
+  const handleFullBackup = async () => {
+    setBackingUp(true)
+    setStatus(null)
+    try {
+      const tables = ['users', 'contacts', 'call_history', 'offers', 'email_campaigns']
+      const backup = { timestamp: new Date().toISOString(), tables: {} }
+      for (const table of tables) {
+        try {
+          const rows = await window.electronAPI?.query?.(`SELECT * FROM ${table}`)
+          backup.tables[table] = rows || []
+        } catch {
+          backup.tables[table] = []
+        }
+      }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      setStatus({ type: 'success', msg: 'Vollständiges Backup erstellt!' })
+    } catch (err) {
+      console.error('Backup error:', err)
+      setStatus({ type: 'error', msg: 'Fehler beim Backup: ' + err.message })
+    }
+    setBackingUp(false)
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+          <HardDrive size={20} className="text-purple-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Backup & Daten</h2>
+          <p className="text-sm text-gray-500">Daten sichern, exportieren und importieren.</p>
+        </div>
+      </div>
+
+      <div className="max-w-lg space-y-4">
+        {/* Kontakte CSV */}
+        <div className="p-5 bg-gray-50 rounded-2xl">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <FileText size={18} className="text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-gray-900">Kontakte CSV</h3>
+              <p className="text-xs text-gray-500 mt-0.5 mb-3">Kontakte als Excel-kompatible CSV-Datei exportieren oder importieren</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCsvExport}
+                  disabled={exporting}
+                  className="px-4 py-2 text-sm font-semibold border-2 border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-40 rounded-xl transition-colors"
+                >
+                  {exporting ? 'Exportieren...' : 'Exportieren'}
+                </button>
+                <button
+                  onClick={() => importRef.current?.click()}
+                  disabled={importing}
+                  className="px-4 py-2 text-sm font-bold bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white rounded-xl transition-colors"
+                >
+                  {importing ? 'Importieren...' : 'Importieren'}
+                </button>
+                <input ref={importRef} type="file" accept=".csv" className="hidden" onChange={handleCsvImport} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Vollständiges Backup */}
+        <div className="p-5 bg-gray-50 rounded-2xl">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Database size={18} className="text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-gray-900">Vollständiges Backup</h3>
+              <p className="text-xs text-gray-500 mt-0.5 mb-3">Alle Kontakte, Anrufe, Angebote, Mitarbeiter und mehr als JSON</p>
+              <button
+                onClick={handleFullBackup}
+                disabled={backingUp}
+                className="px-4 py-2 text-sm font-bold bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-xl transition-colors"
+              >
+                {backingUp ? 'Erstelle Backup...' : 'Backup jetzt erstellen'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tipp */}
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+          <p className="text-xs text-amber-800 font-medium">
+            <span className="font-bold">Tipp:</span> Erstelle regelmäßig Backups und speichere sie an einem sicheren Ort (z.B. Cloud-Laufwerk).
+          </p>
+        </div>
+
+        {/* Status */}
+        {status && (
+          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
+            status.type === 'success' ? 'bg-green-50 text-green-700' :
+            status.type === 'error' ? 'bg-red-50 text-red-600' :
+            'bg-amber-50 text-amber-700'
+          }`}>
+            {status.type === 'success' ? <CheckCircle size={16} /> : status.type === 'error' ? <XCircle size={16} /> : null}
+            {status.msg}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const NAV_ITEMS = [
-  { id: 'profile', label: 'Mein Profil', icon: User },
-  { id: 'appearance', label: 'Erscheinungsbild', icon: Sun },
+  { id: 'profile', label: 'Mein Profil', icon: User, dot: 'green' },
+  { id: 'company', label: 'Firmenprofil', icon: Building2 },
+  { id: 'email', label: 'E-Mail Konto', icon: Mail, dotKey: 'email' },
+  { id: 'calls', label: 'Anrufe', icon: Phone },
+  { id: 'appearance', label: 'Darstellung', icon: Sun },
   { id: 'language', label: 'Sprache', icon: Globe },
   { id: 'notifications', label: 'Benachrichtigungen', icon: Bell },
-  { id: 'email', label: 'E-Mail Konto', icon: Mail },
+  { id: 'backup', label: 'Backup & Daten', icon: HardDrive },
 ]
 
 export default function Settings({ currentUser, onProfileUpdated, onLogout, darkMode, onSetDarkMode, language, onSetLanguage }) {
   const [activeSection, setActiveSection] = useState('profile')
+
+  const emailConfigured = !!(currentUser?.email_config?.email && currentUser?.email_config?.password)
 
   return (
     <div className="h-full flex overflow-hidden bg-gray-50">
@@ -534,6 +1178,8 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
         <nav className="px-3 space-y-1 flex-1">
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
+            const showGreenDot = item.dot === 'green'
+            const showRedDot = item.dotKey === 'email' && !emailConfigured
             return (
               <button
                 key={item.id}
@@ -545,7 +1191,13 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
                 }`}
               >
                 <Icon size={16} className={activeSection === item.id ? 'text-blue-500' : 'text-gray-400'} />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {showGreenDot && (
+                  <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                )}
+                {showRedDot && (
+                  <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                )}
               </button>
             )
           })}
@@ -566,6 +1218,15 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
         {activeSection === 'profile' && (
           <ProfileSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
         )}
+        {activeSection === 'company' && (
+          <CompanySection />
+        )}
+        {activeSection === 'email' && (
+          <EmailSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
+        )}
+        {activeSection === 'calls' && (
+          <CallsSection />
+        )}
         {activeSection === 'appearance' && (
           <AppearanceSection darkMode={darkMode} onSetDarkMode={onSetDarkMode} />
         )}
@@ -575,8 +1236,8 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
         {activeSection === 'notifications' && (
           <NotificationsSection />
         )}
-        {activeSection === 'email' && (
-          <EmailSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
+        {activeSection === 'backup' && (
+          <BackupSection />
         )}
       </div>
     </div>

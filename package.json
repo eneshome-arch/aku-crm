@@ -4,7 +4,7 @@
   "description": "CRM für Akquiseanrufe",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
     "build": "vite build",
     "start": "vite build && electron .",
     "electron": "electron .",

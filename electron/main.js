@@ -21,7 +21,7 @@ try {
   }
 } catch {}
 
-const DOC_PREFIXES = { angebot: 'ZB', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
+const DOC_PREFIXES = { angebot: 'ZB', rahmenvertrag: 'RV', rechnung: 'RG', lieferschein: 'LS', gutschrift: 'GS' }
 
 const store = new Store({ name: 'aku-settings' })
 
@@ -202,6 +202,19 @@ ipcMain.handle('db:init', async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )
+    `)
+    // Migrate: set industry for existing contacts based on company name patterns
+    await pool.query(`
+      UPDATE contacts SET industry = CASE
+        WHEN company_name ~* '(krankenhaus|klinikum|hospital)' AND industry IS NULL THEN 'hospital'
+        WHEN company_name ~* '(reha|rehabilitation)' AND industry IS NULL THEN 'rehabilitation'
+        WHEN company_name ~* '(ambulant|häusliche.*(pflege|krankenpflege)|mobil.*(pflege|dienst)|pflegedienst|sozialstation)' AND industry IS NULL THEN 'ambulatory_care'
+        WHEN company_name ~* '(betreutes wohnen|seniorenresidenz|wohnstift|seniorenwohnanlage)' AND industry IS NULL THEN 'assisted_living'
+        WHEN company_name ~* '(pflegeheim|altenheim|altenpflege|seniorenheim|seniorenpflege|altenzentrum|seniorenzentrum|pflegezentrum|pflege.*heim|heim.*pflege)' AND industry IS NULL THEN 'nursing_home'
+        WHEN company_name ~* '(klinik|medizin)' AND industry IS NULL THEN 'hospital'
+        ELSE industry
+      END
+      WHERE industry IS NULL
     `)
     return { success: true }
   } catch (err) {

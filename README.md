@@ -1,6 +1,6 @@
 # Aku CRM – Akquise & Angebote
 
-Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Marketing und Angebotserstellung.
+Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Marketing, Angebots- und Rahmenvertragserstellung.
 
 ---
 
@@ -23,7 +23,7 @@ Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Mark
 |---|---|
 | Frontend | React + Vite + Tailwind CSS |
 | Backend | Electron (Main Process) |
-| Datenbank | PostgreSQL (Remote-Server) |
+| Datenbank | PostgreSQL (Remote-Server via Hetzner/Coolify) |
 | Updates | electron-updater (automatisch via GitHub Releases) |
 
 ---
@@ -36,13 +36,16 @@ aku-crm/
 │   ├── main.js          # Electron Main Process, alle IPC-Handler, DB-Verbindung
 │   └── preload.js       # contextBridge – exposte API ans Frontend
 ├── src/
-│   ├── App.jsx          # Root-Komponente, View-Routing, Dark Mode, globaler State
+│   ├── App.jsx          # Root-Komponente, View-Routing, Navigation-History, globaler State
 │   ├── main.jsx         # React-Einstiegspunkt
 │   ├── index.css        # Tailwind-Basis + Dark Mode CSS
 │   └── components/
+│       ├── KundenCRM.jsx          # Kunden & CRM – Kontaktliste, Pipeline, Berichte
+│       ├── BelegeModule.jsx       # Belege-Übersicht (Angebote + Rahmenverträge)
 │       ├── AngeboteModule.jsx     # Angebote erstellen, bearbeiten, PDF-Export
-│       ├── Settings.jsx           # Einstellungen (Profil, Dark Mode, Sprache, Benachrichtigungen, E-Mail)
-│       ├── Sidebar.jsx            # Navigation + Kontaktliste
+│       ├── RahmenvertragModule.jsx # Rahmenverträge erstellen und verwalten
+│       ├── Settings.jsx           # Einstellungen (Profil, Firmenprofil, E-Mail, Darstellung)
+│       ├── Sidebar.jsx            # Hauptnavigation (Dashboard, Kunden, Belege, Aktionen)
 │       ├── Dashboard.jsx          # Übersicht, Statistiken
 │       ├── ContactProfile.jsx     # Kontakt-Detailansicht
 │       ├── ContactForm.jsx        # Kontakt anlegen / bearbeiten
@@ -64,8 +67,10 @@ aku-crm/
 
 ## Features
 
-### CRM Akquise
+### Kunden & CRM
 - Kontaktverwaltung mit Status-Tracking (10 Stufen: Nicht kontaktiert → Aktiver Kunde)
+- Einrichtungstyp-Tags (Krankenhaus, Pflegeheim, Ambulante Pflege, Reha Klinik, Betreutes Wohnen)
+- Pipeline-Ansicht (Kanban nach Status)
 - Follow-up Erinnerungen mit Überfälligkeits-Anzeige
 - Anrufsession: sequentielles Durcharbeiten von Kontaktlisten
 - Aktivitätslog pro Kontakt
@@ -76,31 +81,37 @@ aku-crm/
 ### E-Mail Marketing
 - Kampagnen mit Rich-Text-Editor (HTML)
 - SMTP-Versand direkt aus der App (via Nodemailer)
+- Provider-Vorlagen: Outlook, Gmail, GMX, Web.de, Strato, IONOS, eigener SMTP
 - Kampagnen-Ergebnisse werden gespeichert
 
-### Angebote
-- Angebotsliste mit Status (Entwurf, Verschickt, Angenommen, Abgelehnt)
-- **Einrichtungstyp-Auswahl** – passt Texte und Stundensätze automatisch an:
-  - 🏠 Pflegeheim / Seniorenzentrum
-  - 🏥 Krankenhaus / Klinik
-  - 🚗 Ambulanter Pflegedienst
-  - 🏋️ Reha-Klinik
-  - 🧠 Psychiatrie / Sozialpsychiatrie
-  - ♿ Behinderteneinrichtung / Eingliederungshilfe
-- Empfänger aus CRM-Kontakten auswählen (Auto-Fill)
-- Live-Vorschau (A4-skaliert)
-- PDF-Export via Electron `printToPDF`
+### Belege
+- **Angebote** – Erstellen, bearbeiten, PDF-Export mit Firmenprofil
+  - Einrichtungstyp-Auswahl passt Texte und Stundensätze automatisch an
+  - Empfänger aus CRM-Kontakten auswählen (Auto-Fill)
+  - Live-Vorschau (A4-skaliert)
+  - PDF-Export via Electron `printToPDF`
+- **Rahmenverträge** – Individuelle Verträge pro Kunde
+  - Vertragsspezifische Felder (Laufzeit, Kündigungsfrist, Konditionen)
+  - Automatische Nummernvergabe (RV-YYYY-NNN)
+- Status-Tracking: Entwurf, Verschickt, Angenommen, Abgelehnt
+- Finanzübersicht: Offene Angebote, Angenommene Summen
 
 ### Einstellungen
-- **Profilbild** hochladen (lokal gespeichert)
-- **Dark Mode** – dunkles Design
+- **Mein Profil** – Name, E-Mail, Standort, Profilbild
+- **Firmenprofil** – Logo, Firmenname, Adresse, Kontaktdaten (wird automatisch in Angebots-PDFs übernommen)
+- **E-Mail Konto** – SMTP-Konfiguration (Strato, Outlook, Gmail, GMX, Web.de, IONOS, eigener Server)
+- **Anrufe** – Anrufeinstellungen
+- **Darstellung** – Hell/Dunkel-Modus
 - **Sprache** – Deutsch, English, Türkçe
-- **Benachrichtigungen** – Follow-ups, E-Mail, Ton
-- **E-Mail Konto** – SMTP-Konfiguration (Outlook, Gmail, GMX etc.)
+- **Backup & Daten** – Datenexport
 
 ### Admin
 - Benutzerverwaltung (Passwort zurücksetzen, löschen)
 - Touch ID Login (macOS)
+
+### Navigation
+- Globaler Zurück-Button mit View-History (navigiert immer zur vorherigen Seite)
+- Sidebar: Dashboard, Kunden & CRM, Belege, Aktionen (Kunden finden, Anrufsession, E-Mail Marketing)
 
 ### Automatische Updates
 - App prüft beim Start ob eine neue Version verfügbar ist
@@ -113,11 +124,11 @@ aku-crm/
 
 | Tabelle | Inhalt |
 |---|---|
-| `users` | CRM-Nutzer, Auth, Einstellungen |
-| `contacts` | Akquise-Kontakte mit Status & Follow-up |
+| `users` | CRM-Nutzer, Auth, Einstellungen, E-Mail-Konfiguration |
+| `contacts` | Akquise-Kontakte mit Status, Follow-up & Einrichtungstyp |
 | `call_history` | Anrufprotokolle |
 | `email_campaigns` | E-Mail-Kampagnen & Ergebnisse |
-| `offers` | Angebote (Zeitblick-Template, alle Typen) |
+| `offers` | Angebote & Rahmenverträge (doc_type: angebot/rahmenvertrag) |
 | `documents` | Datei-Anhänge pro Kontakt |
 
 ---

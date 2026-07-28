@@ -1,5 +1,21 @@
-import { useState, useEffect, useCallback } from 'react'
-import { AlertCircle, Database } from 'lucide-react'
+import { useState, useEffect, useCallback, Component } from 'react'
+import { AlertCircle, Database, ChevronLeft } from 'lucide-react'
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) { console.error('React Error:', error, info) }
+  render() {
+    if (this.state.error) return (
+      <div style={{padding:40,color:'red',fontFamily:'monospace',whiteSpace:'pre-wrap'}}>
+        <h2>Fehler aufgetreten:</h2>
+        <p>{this.state.error.toString()}</p>
+        <button onClick={() => this.setState({error:null})} style={{marginTop:16,padding:'8px 16px',cursor:'pointer'}}>Erneut versuchen</button>
+      </div>
+    )
+    return this.props.children
+  }
+}
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import ContactProfile from './components/ContactProfile'
@@ -13,6 +29,8 @@ import Login from './components/Login'
 import AdminPanel from './components/AdminPanel'
 import WindowsTitleBar from './components/WindowsTitleBar'
 import AngeboteModule from './components/AngeboteModule'
+import BelegeModule from './components/BelegeModule'
+import KundenCRM from './components/KundenCRM'
 
 const platform = window.electronAPI?.platform || 'darwin'
 
@@ -20,7 +38,8 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [contacts, setContacts] = useState([])
   const [selectedContact, setSelectedContact] = useState(null)
-  const [view, setView] = useState('dashboard') // 'dashboard' | 'contact' | 'settings' | 'admin'
+  const [view, setView] = useState('dashboard')
+  const [viewHistory, setViewHistory] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [showFindCustomers, setShowFindCustomers] = useState(false)
   const [showCallList, setShowCallList] = useState(false)
@@ -144,13 +163,26 @@ export default function App() {
     setView('dashboard')
   }
 
+  const navigateTo = (newView) => {
+    setViewHistory(h => [...h, view])
+    setView(newView)
+  }
+
+  const goBack = () => {
+    const prev = viewHistory[viewHistory.length - 1] || 'dashboard'
+    setViewHistory(h => h.slice(0, -1))
+    setView(prev)
+    if (prev !== 'contact') setSelectedContact(null)
+  }
+
   const handleSelectContact = (contact) => {
     setSelectedContact(contact)
-    setView('contact')
+    navigateTo('contact')
   }
 
   const handleShowDashboard = () => {
     setSelectedContact(null)
+    setViewHistory([])
     setView('dashboard')
   }
 
@@ -268,14 +300,27 @@ export default function App() {
         onFindCustomers={() => setShowFindCustomers(true)}
         onStartCalling={() => setShowCallList(true)}
         onEmailMarketing={() => setShowEmailMarketing(true)}
-        onOpenSettings={() => { setSelectedContact(null); setView('settings') }}
-        onOpenAdmin={() => { setSelectedContact(null); setView('admin') }}
-        onOpenAngebote={() => { setSelectedContact(null); setView('angebote') }}
+        onOpenSettings={() => { setSelectedContact(null); navigateTo('settings') }}
+        onOpenAdmin={() => { setSelectedContact(null); navigateTo('admin') }}
+        onOpenAngebote={() => { setSelectedContact(null); navigateTo('angebote') }}
+        onOpenKunden={() => { setSelectedContact(null); navigateTo('kunden') }}
         currentView={view}
         isAdmin={currentUser?.is_admin}
       />
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden flex flex-col">
+        {view !== 'dashboard' && (
+          <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
+            <button
+              onClick={goBack}
+              className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 text-sm font-medium transition-colors"
+            >
+              <ChevronLeft size={16} />
+              Zurück
+            </button>
+          </div>
+        )}
+        <div className="flex-1 overflow-hidden">
         {view === 'dashboard' && (
           <Dashboard
             contacts={contacts}
@@ -302,7 +347,9 @@ export default function App() {
           />
         )}
         {view === 'admin' && currentUser?.is_admin && <AdminPanel />}
-        {view === 'angebote' && <AngeboteModule currentUser={currentUser} />}
+        {view === 'angebote' && <ErrorBoundary><BelegeModule currentUser={currentUser} /></ErrorBoundary>}
+        {view === 'kunden' && <KundenCRM contacts={contacts} currentUser={currentUser} onSelectContact={handleSelectContact} />}
+        </div>
       </main>
 
       {showAddForm && (
@@ -344,7 +391,7 @@ export default function App() {
           contacts={contacts}
           currentUser={currentUser}
           onClose={() => setShowEmailMarketing(false)}
-          onOpenSettings={() => { setShowEmailMarketing(false); setView('settings') }}
+          onOpenSettings={() => { setShowEmailMarketing(false); navigateTo('settings') }}
         />
       )}
       </div>

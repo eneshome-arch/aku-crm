@@ -115,7 +115,19 @@ function formatDateDE(isoDate) {
   return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function generateHTML(offer) {
+function generateHTML(offer, company = {}) {
+  const c = {
+    name: company.companyName || 'Zeitblick Personalservice',
+    logo: company.logo || '',
+    accentColor: company.accentColor || '#1e40af',
+    address: [company.address, [company.postalCode, company.city].filter(Boolean).join(' ')].filter(Boolean).join(' · ') || 'Vahrenwalder Str. 255 · 30179 Hannover',
+    phone: company.phone || '0163 – 864 4309',
+    email: company.email || 'info@zeitblick-personal.de',
+    website: company.website || 'www.zeitblick-personal.de',
+    footerText: company.footerText || '',
+    contactPerson: company.contactPerson || '',
+    ustId: company.ustId || '',
+  }
   const badgeColors = {
     green: 'background:#dcfce7;color:#166534',
     blue: 'background:#dbeafe;color:#1d4ed8',
@@ -148,7 +160,7 @@ function generateHTML(offer) {
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Angebot – Zeitblick Personalservice</title>
+  <title>Angebot – ${c.name}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -160,7 +172,7 @@ function generateHTML(offer) {
     .header-contact { text-align:right; }
     .header-contact p { font-size:8.5pt; color:rgba(255,255,255,0.6); line-height:1.7; }
     .header-contact strong { color:rgba(255,255,255,0.9); font-weight:500; }
-    .accent-bar { height:3px; background:linear-gradient(to right,#3b82f6,#06b6d4); }
+    .accent-bar { height:3px; background:linear-gradient(to right,${c.accentColor},#06b6d4); }
     .body { padding:20px 40px 24px; flex:1; }
     .meta-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #e2e8f0; }
     .meta-label { font-size:7.5pt; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; margin-bottom:5px; }
@@ -174,7 +186,7 @@ function generateHTML(offer) {
     .highlight-box { background:#f0f9ff; border-left:3px solid #3b82f6; border-radius:0 8px 8px 0; padding:10px 16px; margin:10px 0; }
     .highlight-box p { color:#1e40af; font-size:9pt; margin:0; }
     .section { margin:14px 0; }
-    .section-title { font-size:8pt; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#3b82f6; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .section-title { font-size:8pt; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:${c.accentColor}; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
     .section-title::after { content:''; flex:1; height:1px; background:#e2e8f0; }
     .pricing-table { width:100%; border-collapse:collapse; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
     .pricing-table thead tr { background:#0f172a; }
@@ -201,7 +213,7 @@ function generateHTML(offer) {
     .sig-greeting { font-size:10pt; color:#334155; margin-bottom:12px; }
     .sig-name { font-size:11pt; font-weight:700; color:#0f172a; }
     .sig-role { font-size:8.5pt; color:#64748b; margin-top:3px; }
-    .sig-company { font-size:8.5pt; color:#3b82f6; font-weight:600; margin-top:2px; }
+    .sig-company { font-size:8.5pt; color:${c.accentColor}; font-weight:600; margin-top:2px; }
     .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:11px 40px; display:flex; justify-content:space-between; align-items:center; margin-top:auto; }
     .footer p { font-size:7.5pt; color:#94a3b8; line-height:1.6; }
     .footer .footer-brand { font-weight:700; color:#475569; font-size:8pt; }
@@ -213,17 +225,15 @@ function generateHTML(offer) {
   <div class="header">
     <div>
       <div class="header-logo">
-        <img src="zeitblick_logo.png" alt="Zeitblick Personalservice" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-        <span style="display:none;color:white;font-size:18pt;font-weight:700;letter-spacing:-0.5px">Zeitblick</span>
+        ${c.logo ? `<img src="${c.logo}" alt="${c.name}" style="height:40px;width:auto;display:block">` : `<span style="color:white;font-size:18pt;font-weight:700;letter-spacing:-0.5px">${c.name}</span>`}
       </div>
-      <div class="header-tagline">Personalservice · Hannover</div>
+      <div class="header-tagline">${c.city ? c.name.split(' ')[0] + ' · ' + (company.city || 'Hannover') : ''}</div>
     </div>
     <div class="header-contact">
-      <p><strong>Enes Cansever</strong></p>
-      <p>Vertrieb &amp; Personaldisposition</p>
-      <p>Tel. 0163 – 864 4309</p>
-      <p>info@zeitblick-personal.de</p>
-      <p>www.zeitblick-personal.de</p>
+      ${c.contactPerson ? `<p><strong>${c.contactPerson}</strong></p>` : ''}
+      <p>Tel. ${c.phone}</p>
+      <p>${c.email}</p>
+      <p>${c.website}</p>
     </div>
   </div>
   <div class="accent-bar"></div>
@@ -302,16 +312,16 @@ function generateHTML(offer) {
     </div>
     <div class="signature">
       <div class="sig-greeting">Mit freundlichen Grüßen</div>
-      <div class="sig-name">Tasdemir</div>
-      <div class="sig-role">Geschäftsführer</div>
-      <div class="sig-company">Zeitblick Personalservice</div>
+      <div class="sig-name">${c.contactPerson || c.name}</div>
+      <div class="sig-role">Geschäftsführung</div>
+      <div class="sig-company">${c.name}</div>
     </div>
   </div>
 
   <div class="footer">
-    <div><p class="footer-brand">Zeitblick Personalservice</p><p>Vahrenwalder Str. 255 · 30179 Hannover</p></div>
-    <div style="text-align:center"><p>Tel. 0163 – 864 4309</p><p>info@zeitblick-personal.de</p></div>
-    <div style="text-align:right"><p>www.zeitblick-personal.de</p><p>Lizenz-Nr. gemäß AÜG liegt vor</p></div>
+    <div><p class="footer-brand">${c.name}</p><p>${c.address}</p></div>
+    <div style="text-align:center"><p>Tel. ${c.phone}</p><p>${c.email}</p></div>
+    <div style="text-align:right"><p>${c.website}</p>${c.ustId ? `<p>USt-IdNr. ${c.ustId}</p>` : ''}</div>
   </div>
 </div>
 </body>
@@ -328,6 +338,7 @@ export default function AngeboteModule({ currentUser }) {
   const [toast, setToast] = useState(null)
   const [contactSearch, setContactSearch] = useState('')
   const [showContactDropdown, setShowContactDropdown] = useState(false)
+  const [companyProfile, setCompanyProfile] = useState({})
   const contactSearchRef = useRef(null)
 
   const showToast = (msg, type = 'success') => {
@@ -353,6 +364,11 @@ export default function AngeboteModule({ currentUser }) {
   useEffect(() => {
     loadOffers()
     loadContacts()
+    async function loadCompany() {
+      const s = await window.electronAPI?.getSettings?.()
+      if (s?.companyProfile) setCompanyProfile(s.companyProfile)
+    }
+    loadCompany()
   }, [loadOffers, loadContacts])
 
   const filteredContacts = contacts.filter(c => {
@@ -494,7 +510,7 @@ export default function AngeboteModule({ currentUser }) {
     if (!selected) return
     setExporting(true)
     try {
-      const html = generateHTML(selected)
+      const html = generateHTML(selected, companyProfile)
       const filename = `Angebot_${selected.recipientCompany || 'Zeitblick'}_${selected.offerNumber || new Date().toISOString().slice(0, 10)}.pdf`
       const res = await window.electronAPI.offersExportPdf({ html, filename })
       if (res.success) showToast('PDF gespeichert und geöffnet')
@@ -749,7 +765,7 @@ export default function AngeboteModule({ currentUser }) {
             ) : (
               <div className="flex items-start justify-center p-6 bg-gray-200 min-h-full">
                 <div className="shadow-2xl" style={{ transform: 'scale(0.72)', transformOrigin: 'top center', marginBottom: '-200px' }}>
-                  <iframe key={JSON.stringify(selected)} srcDoc={generateHTML(selected)}
+                  <iframe key={JSON.stringify(selected)} srcDoc={generateHTML(selected, companyProfile)}
                     style={{ width: '210mm', height: '297mm', border: 'none', display: 'block', background: '#fff' }}
                     title="Angebot Vorschau" />
                 </div>

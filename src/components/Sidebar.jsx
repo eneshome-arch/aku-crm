@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, LayoutDashboard, AlertTriangle, Phone, Mail, Settings, Shield, FileText } from 'lucide-react'
+import { Plus, Search, LayoutDashboard, AlertTriangle, Phone, Mail, Settings, Shield, FileText, Building2, Users } from 'lucide-react'
 
 const platform = window.electronAPI?.platform || 'darwin'
 
@@ -40,7 +40,7 @@ function isOverdue(dt) {
   return new Date(dt) < new Date()
 }
 
-export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, onOpenAngebote, currentView, isAdmin }) {
+export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, onOpenAngebote, onOpenKunden, currentView, isAdmin }) {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState(0)
 
@@ -87,150 +87,109 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
         )}
       </div>
 
-      {/* Nav buttons */}
-      <div className="px-3 mb-2 flex-shrink-0 space-y-1">
-        <button
-          onClick={onShowDashboard}
-          className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-            currentView === 'dashboard'
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          <LayoutDashboard size={15} />
-          Dashboard
-        </button>
-        <button
-          onClick={onFindCustomers}
-          className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-green-600 hover:bg-green-50 transition-colors flex items-center gap-2"
-        >
-          <Search size={15} />
-          Kunden finden
-        </button>
-        <button
-          onClick={onStartCalling}
-          className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2"
-        >
-          <Phone size={15} />
-          Anrufsession starten
-        </button>
-        <button
-          onClick={onEmailMarketing}
-          className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-2"
-        >
-          <Mail size={15} />
-          E-Mail Marketing
-        </button>
-        <button
-          onClick={onOpenAngebote}
-          className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-            currentView === 'angebote'
-              ? 'bg-orange-50 text-orange-600'
-              : 'text-orange-500 hover:bg-orange-50'
-          }`}
-        >
-          <FileText size={15} />
-          Angebote
-        </button>
-      </div>
-
       {/* Search */}
       <div className="px-3 mb-2 flex-shrink-0">
         <div className="relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Suchen..."
+            placeholder="Suchen"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 bg-gray-100 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full pl-8 pr-10 py-2 bg-gray-100 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
           />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-300 font-medium">⌘K</span>
         </div>
       </div>
 
-      {/* Status filter */}
-      <div className="px-3 mb-3 flex-shrink-0">
-        <select
-          value={filterStatus}
-          onChange={e => setFilterStatus(Number(e.target.value))}
-          className="w-full px-3 py-2 bg-gray-100 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+      {/* Navigation */}
+      <div className="px-3 mb-1 flex-shrink-0 space-y-1">
+        <button
+          onClick={onShowDashboard}
+          className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+            currentView === 'dashboard'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
         >
-          <option value={0}>Alle Status</option>
-          {Object.entries(STATUS_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
+          <LayoutDashboard size={16} />
+          Dashboard
+        </button>
+        <button
+          onClick={onOpenKunden}
+          className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+            currentView === 'kunden' || currentView === 'contact'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <Building2 size={16} />
+          Kunden & CRM
+        </button>
+        <button
+          onClick={onOpenAngebote}
+          className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+            currentView === 'angebote'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <FileText size={16} />
+          Belege
+        </button>
       </div>
 
-      {/* Contact count */}
-      <div className="px-4 mb-2 flex-shrink-0">
-        <span className="text-xs text-gray-400 font-medium">{filtered.length} Kontakte</span>
+      {/* Aktionen */}
+      <div className="px-3 mb-2 flex-shrink-0">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-2">Aktionen</p>
+        <div className="space-y-1">
+          <button
+            onClick={onFindCustomers}
+            className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors flex items-center gap-3"
+          >
+            <Search size={16} />
+            Kunden finden
+          </button>
+          <button
+            onClick={onStartCalling}
+            className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors flex items-center gap-3"
+          >
+            <Phone size={16} />
+            Anrufsession
+          </button>
+          <button
+            onClick={onEmailMarketing}
+            className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors flex items-center gap-3"
+          >
+            <Mail size={16} />
+            E-Mail Marketing
+          </button>
+        </div>
       </div>
 
-      {/* Contact list */}
-      <div className="flex-1 overflow-y-auto px-2">
-        {filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 text-sm">
-            Keine Kontakte gefunden
-          </div>
-        ) : (
-          filtered.map(contact => {
-            const overdue = isOverdue(contact.next_followup)
-            const isSelected = selectedContact?.id === contact.id
-            return (
-              <button
-                key={contact.id}
-                onClick={() => onSelectContact(contact)}
-                className={`w-full text-left px-3 py-3 rounded-xl mb-1 transition-all ${
-                  isSelected ? 'bg-blue-50 ring-1 ring-blue-200' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">
-                      {contact.company_name}
-                    </p>
-                    {(contact.first_name || contact.last_name) && (
-                      <p className="text-xs text-gray-500 truncate mt-0.5">
-                        {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-                      </p>
-                    )}
-                    {contact.next_followup && (
-                      <p className={`text-xs mt-1 font-medium flex items-center gap-1 ${overdue ? 'text-red-500' : 'text-gray-400'}`}>
-                        {overdue && <AlertTriangle size={11} />}
-                        {formatDate(contact.next_followup)}
-                      </p>
-                    )}
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 mt-0.5 ${STATUS_COLORS[contact.status] || STATUS_COLORS[1]}`}>
-                    {contact.status}
-                  </span>
-                </div>
-              </button>
-            )
-          })
-        )}
-      </div>
+      {/* Spacer */}
+      <div className="flex-1" />
+
       {/* Bottom nav */}
       <div className="px-3 py-3 border-t border-gray-100 flex-shrink-0 space-y-1">
         {isAdmin && (
           <button
             onClick={onOpenAdmin}
-            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
               currentView === 'admin' ? 'bg-purple-50 text-purple-700' : 'text-purple-500 hover:bg-purple-50'
             }`}
           >
-            <Shield size={15} />
+            <Shield size={16} />
             Admin Panel
           </button>
         )}
         <button
           onClick={onOpenSettings}
-          className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+          className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
             currentView === 'settings' ? 'bg-gray-100 text-gray-800' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
-          <Settings size={15} />
+          <Settings size={16} />
           Einstellungen
         </button>
       </div>
