@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback } from 'react'
 import {
   Users, Building2, Kanban, BarChart3, Activity,
@@ -308,7 +309,7 @@ function BerichteView({ contacts, currentUser }) {
       try {
         const now = new Date()
         const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-        const res = await window.electronAPI.query(
+        const res = await api.query(
           `SELECT COUNT(*) as cnt FROM call_history ch JOIN contacts c ON ch.contact_id = c.id WHERE c.user_id = $1 AND ch.call_date >= $2`,
           [currentUser.id, firstOfMonth]
         )
@@ -414,7 +415,7 @@ function AktivitaetsFeedView({ currentUser }) {
     async function load() {
       if (!currentUser?.id) return
       try {
-        const res = await window.electronAPI.query(
+        const res = await api.query(
           `SELECT ch.*, c.company_name FROM call_history ch JOIN contacts c ON ch.contact_id = c.id WHERE c.user_id = $1 ORDER BY ch.call_date DESC LIMIT 50`,
           [currentUser.id]
         )

@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState } from 'react'
 import { Phone, Save } from 'lucide-react'
 
@@ -12,7 +13,7 @@ export default function AddCallModal({ contactId, onSaved, onClose }) {
   const handleSave = async () => {
     if (!form.result.trim()) return
     setSaving(true)
-    await window.electronAPI.query(
+    await api.query(
       `INSERT INTO call_history (contact_id, call_date, result, notes) VALUES ($1, $2, $3, $4)`,
       [contactId, form.call_date, form.result, form.notes]
     )

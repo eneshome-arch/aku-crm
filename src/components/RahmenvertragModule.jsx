@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Plus, FileText, Trash2, Download, Save, Eye, Edit3, ChevronLeft, X, Search, UserCheck, RefreshCw } from 'lucide-react'
 
@@ -365,7 +366,7 @@ export default function RahmenvertragModule({ currentUser }) {
 
   const loadOffers = useCallback(async () => {
     if (!currentUser?.id) return
-    const res = await window.electronAPI.offersList(currentUser.id)
+    const res = await api.offersList(currentUser.id)
     if (res.success) {
       // Filter to only show rahmenvertrag documents
       setOffers((res.offers || []).filter(o => o.doc_type === 'rahmenvertrag'))
@@ -374,7 +375,7 @@ export default function RahmenvertragModule({ currentUser }) {
 
   const loadContacts = useCallback(async () => {
     if (!currentUser?.id) return
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `SELECT id, company_name, first_name, last_name, address, city, postal_code FROM contacts WHERE user_id=$1 ORDER BY company_name ASC`,
       [currentUser.id]
     )
@@ -385,7 +386,7 @@ export default function RahmenvertragModule({ currentUser }) {
     loadOffers()
     loadContacts()
     async function loadCompany() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.companyProfile) setCompanyProfile(s.companyProfile)
     }
     loadCompany()
@@ -488,7 +489,7 @@ export default function RahmenvertragModule({ currentUser }) {
         abrechnungsintervall: selected.abrechnungsintervall,
         besondereVereinbarungen: selected.besondereVereinbarungen,
       })
-      const res = await window.electronAPI.offersSave({
+      const res = await api.offersSave({
         id: selected.id,
         userId: currentUser.id,
         contactId: selected.contactId || null,
@@ -521,7 +522,7 @@ export default function RahmenvertragModule({ currentUser }) {
 
   const handleDelete = async (offerId) => {
     if (!confirm('Rahmenvertrag l\u00f6schen?')) return
-    const res = await window.electronAPI.offersDelete(offerId, currentUser.id)
+    const res = await api.offersDelete(offerId, currentUser.id)
     if (res.success) {
       await loadOffers()
       if (selected?.id === offerId) setSelected(null)
@@ -535,7 +536,7 @@ export default function RahmenvertragModule({ currentUser }) {
     try {
       const html = generateHTML(selected, companyProfile)
       const filename = `Rahmenvertrag_${selected.recipientCompany || 'Zeitblick'}_${selected.offerNumber || new Date().toISOString().slice(0, 10)}.pdf`
-      const res = await window.electronAPI.offersExportPdf({ html, filename })
+      const res = await api.offersExportPdf({ html, filename })
       if (res.success) showToast('PDF gespeichert und ge\u00f6ffnet')
       else if (res.error !== 'Abgebrochen') showToast(res.error || 'PDF-Fehler', 'error')
     } finally {

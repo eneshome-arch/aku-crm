@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState } from 'react'
 import { Search, X, Hospital, Home, Ambulance, Activity, Building2, Plus, Check } from 'lucide-react'
 
@@ -97,7 +98,7 @@ export default function FindCustomers({ userId, userLat, userLon, onAddContact, 
     setResults([])
     try {
       const query = buildOverpassQuery(userLat || 52.3759, userLon || 9.7320)
-      const data = await window.electronAPI.overpass(query)
+      const data = await api.overpass(query)
       const parsed = parseResults(data.elements || [])
       setResults(parsed)
       if (parsed.length === 0) setError('Keine Ergebnisse gefunden.')
@@ -110,7 +111,7 @@ export default function FindCustomers({ userId, userLat, userLon, onAddContact, 
   }
 
   const handleAdd = async (r) => {
-    await window.electronAPI.query(
+    await api.query(
       `INSERT INTO contacts (user_id, company_name, address, city, postal_code, phone_central, email, website, industry, status)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,1) ON CONFLICT DO NOTHING RETURNING id`,
       [userId, r.name, r.address, r.city, r.postal_code, r.phone, r.email, r.website, r.type || null]

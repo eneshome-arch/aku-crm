@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { Users, Trash2, KeyRound, CheckCircle, RefreshCw, Shield, Building2, X, AlertTriangle, ChevronRight, Search } from 'lucide-react'
 import AdminUserDetail from './AdminUserDetail'
@@ -52,7 +53,7 @@ function ResetPasswordModal({ user, onClose, onDone }) {
   const handleReset = async () => {
     if (pw.length < 4) { setError('Mindestens 4 Zeichen.'); return }
     setLoading(true)
-    const res = await window.electronAPI.adminResetPassword(user.id, pw)
+    const res = await api.adminResetPassword(user.id, pw)
     setLoading(false)
     if (res.success) {
       setDone(true)
@@ -123,7 +124,7 @@ export default function AdminPanel() {
     setLoading(true)
     setError('')
     try {
-      const res = await window.electronAPI.adminGetUsers()
+      const res = await api.adminGetUsers()
       if (res.success) setUsers(res.users)
       else setError(res.error || 'Fehler beim Laden')
     } catch (e) {
@@ -137,7 +138,7 @@ export default function AdminPanel() {
   const handleDelete = async () => {
     if (!deleteUser) return
     setDeleting(true)
-    await window.electronAPI.adminDeleteUser(deleteUser.id)
+    await api.adminDeleteUser(deleteUser.id)
     setDeleting(false)
     setDeleteUser(null)
     load()

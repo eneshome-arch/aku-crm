@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback } from 'react'
 import { Phone, PhoneOff, ChevronRight, SkipForward, X, Clock, CheckCircle } from 'lucide-react'
 
@@ -80,7 +81,7 @@ export default function CallSession({ contacts, onClose, onSessionEnd }) {
 
     // Anruf in Historie speichern
     if (result || notes) {
-      await window.electronAPI.query(
+      await api.query(
         `INSERT INTO call_history (contact_id, call_date, result, notes) VALUES ($1, NOW(), $2, $3)`,
         [contact.id, result || 'Angerufen', notes]
       )
@@ -88,7 +89,7 @@ export default function CallSession({ contacts, onClose, onSessionEnd }) {
 
     // Status aktualisieren falls geändert
     const statusToSave = newStatus || (result === 'Kein Interesse' ? 10 : result === 'Interesse vorhanden' ? 4 : 2)
-    await window.electronAPI.query(
+    await api.query(
       `UPDATE contacts SET status=$1, updated_at=NOW() WHERE id=$2`,
       [statusToSave, contact.id]
     )

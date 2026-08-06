@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback } from 'react'
 import {
   FileText, Search, Plus, ChevronLeft, Calendar, Coins,
@@ -43,7 +44,7 @@ export default function BelegeModule({ currentUser }) {
 
   const loadOffers = useCallback(async () => {
     if (!currentUser?.id) return
-    const res = await window.electronAPI.offersList(currentUser.id)
+    const res = await api.offersList(currentUser.id)
     if (res.success) setOffers(res.offers)
   }, [currentUser])
 

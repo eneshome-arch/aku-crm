@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { Minus, Square, X } from 'lucide-react'
 
@@ -5,8 +6,8 @@ export default function WindowsTitleBar() {
   const [isMaximized, setIsMaximized] = useState(false)
 
   useEffect(() => {
-    window.electronAPI.windowIsMaximized().then(setIsMaximized)
-    window.electronAPI.onWindowMaximized(setIsMaximized)
+    api.windowIsMaximized().then(setIsMaximized)
+    api.onWindowMaximized(setIsMaximized)
   }, [])
 
   return (
@@ -22,19 +23,19 @@ export default function WindowsTitleBar() {
       </span>
       <div className="flex" style={{ WebkitAppRegion: 'no-drag' }}>
         <button
-          onClick={() => window.electronAPI.windowMinimize()}
+          onClick={() => api.windowMinimize()}
           className="w-12 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
         >
           <Minus size={14} />
         </button>
         <button
-          onClick={() => window.electronAPI.windowMaximize()}
+          onClick={() => api.windowMaximize()}
           className="w-12 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
         >
           <Square size={12} />
         </button>
         <button
-          onClick={() => window.electronAPI.windowClose()}
+          onClick={() => api.windowClose()}
           className="w-12 h-8 flex items-center justify-center text-gray-500 hover:bg-red-500 hover:text-white transition-colors"
         >
           <X size={14} />

@@ -1,3 +1,4 @@
+import { api } from './api'
 import { useState, useEffect, useCallback, Component } from 'react'
 import { AlertCircle, Database, ChevronLeft } from 'lucide-react'
 
@@ -32,7 +33,7 @@ import AngeboteModule from './components/AngeboteModule'
 import BelegeModule from './components/BelegeModule'
 import KundenCRM from './components/KundenCRM'
 
-const platform = window.electronAPI?.platform || 'darwin'
+const platform = api.platform || 'darwin'
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null)
@@ -57,7 +58,7 @@ export default function App() {
   const loadContacts = useCallback(async (userId) => {
     const uid = userId || currentUser?.id
     if (!uid) return
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `SELECT c.*,
         (SELECT COUNT(*) FROM call_history WHERE contact_id = c.id) as call_count
        FROM contacts c
@@ -74,14 +75,14 @@ export default function App() {
   useEffect(() => {
     async function init() {
       try {
-        const configured = await window.electronAPI.dbIsConfigured()
+        const configured = await api.dbIsConfigured()
         if (!configured) {
-          const saved = await window.electronAPI.dbGetConfig()
+          const saved = await api.dbGetConfig()
           if (saved && saved.host) setDbSetup(s => ({ ...s, ...saved }))
           setDbStatus('setup')
           return
         }
-        const res = await window.electronAPI.init()
+        const res = await api.init()
         if (res && res.success) {
           setDbStatus('ok')
         } else {
@@ -101,9 +102,9 @@ export default function App() {
     setDbSetupLoading(true)
     setDbSetupError('')
     try {
-      const res = await window.electronAPI.dbConfigure(dbSetup)
+      const res = await api.dbConfigure(dbSetup)
       if (res.success) {
-        const initRes = await window.electronAPI.init()
+        const initRes = await api.init()
         if (initRes && initRes.success) {
           setDbStatus('ok')
         } else {
@@ -126,13 +127,13 @@ export default function App() {
   }, [currentUser])
 
   useEffect(() => {
-    window.electronAPI?.onUpdateAvailable?.(() => setUpdateStatus('available'))
-    window.electronAPI?.onUpdateReady?.(() => setUpdateStatus('ready'))
+    api.onUpdateAvailable?.(() => setUpdateStatus('available'))
+    api.onUpdateReady?.(() => setUpdateStatus('ready'))
   }, [])
 
   useEffect(() => {
     async function loadPrefs() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.darkMode) { setDarkMode(true); document.documentElement.classList.add('dark') }
       if (s?.language) setLanguage(s.language)
     }
@@ -141,14 +142,14 @@ export default function App() {
 
   const handleSetDarkMode = (val) => {
     setDarkMode(val)
-    window.electronAPI?.setSetting?.('darkMode', val)
+    api.setSetting?.('darkMode', val)
     if (val) document.documentElement.classList.add('dark')
     else document.documentElement.classList.remove('dark')
   }
 
   const handleSetLanguage = (val) => {
     setLanguage(val)
-    window.electronAPI?.setSetting?.('language', val)
+    api.setSetting?.('language', val)
   }
 
   const handleLogin = (user) => {
@@ -279,7 +280,7 @@ export default function App() {
       {updateStatus === 'ready' && (
         <div className="bg-green-600 text-white text-sm px-4 py-2 flex items-center justify-between z-50">
           <span>Update bereit — App wird nach dem Neustart aktualisiert.</span>
-          <button onClick={() => window.electronAPI.installUpdate()} className="bg-white text-green-700 font-medium px-3 py-1 rounded-lg text-xs hover:bg-green-50 transition-colors">
+          <button onClick={() => api.installUpdate()} className="bg-white text-green-700 font-medium px-3 py-1 rounded-lg text-xs hover:bg-green-50 transition-colors">
             Jetzt neu starten
           </button>
         </div>

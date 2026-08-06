@@ -5,7 +5,10 @@
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
+    "dev:web": "concurrently \"vite\" \"node server/index.js\"",
     "build": "vite build",
+    "build:web": "vite build --config vite.web.config.js",
+    "start:api": "node server/index.js",
     "start": "vite build && electron .",
     "electron": "electron .",
     "dist": "vite build && electron-builder"
@@ -65,9 +68,15 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.8.9",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.21.0",
     "nodemailer": "^9.0.1",
     "pg": "^8.11.0"

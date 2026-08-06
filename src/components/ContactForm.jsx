@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useRef } from 'react'
 import { Download, CheckCircle, XCircle } from 'lucide-react'
 
@@ -184,7 +185,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
     if (!urlInput.trim()) return
     setExtracting(true)
     setExtractMsg('')
-    const res = await window.electronAPI.extract(urlInput.trim())
+    const res = await api.extract(urlInput.trim())
     setExtracting(false)
     if (!res.success) {
       setExtractMsg('Fehler: ' + res.error)
@@ -219,7 +220,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
       return
     }
     setSaving(true)
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `INSERT INTO contacts (
         user_id, company_name, industry, company_size, address, city, postal_code, website,
         first_name, last_name, position, phone_central, phone_direct, mobile, email,

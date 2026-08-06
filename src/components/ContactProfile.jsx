@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback } from 'react'
 import { Pencil, Save, Trash2, X, Phone, Plus } from 'lucide-react'
 import AddCallModal from './AddCallModal'
@@ -108,7 +109,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
   }, [contact])
 
   const loadCallHistory = useCallback(async () => {
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `SELECT * FROM call_history WHERE contact_id = $1 ORDER BY call_date DESC`,
       [contact.id]
     )
@@ -123,7 +124,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
 
   const handleSave = async () => {
     setSaving(true)
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `UPDATE contacts SET
         company_name=$1, industry=$2, company_size=$3, address=$4, city=$5, postal_code=$6, website=$7,
         first_name=$8, last_name=$9, position=$10, phone_central=$11, phone_direct=$12, mobile=$13, email=$14,
@@ -146,7 +147,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
   }
 
   const handleDelete = async () => {
-    await window.electronAPI.query(`DELETE FROM contacts WHERE id=$1`, [contact.id])
+    await api.query(`DELETE FROM contacts WHERE id=$1`, [contact.id])
     onDeleted()
   }
 

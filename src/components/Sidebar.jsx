@@ -1,7 +1,8 @@
+import { api } from '../api'
 import { useState } from 'react'
 import { Plus, Search, LayoutDashboard, AlertTriangle, Phone, Mail, Settings, Shield, FileText, Building2, Users } from 'lucide-react'
 
-const platform = window.electronAPI?.platform || 'darwin'
+const platform = api.platform || 'darwin'
 
 const STATUS_LABELS = {
   1: 'Nicht kontaktiert',

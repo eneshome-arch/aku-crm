@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { X, Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown } from 'lucide-react'
 
@@ -67,7 +68,7 @@ export default function EmailSettings({ onClose }) {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    window.electronAPI.getSettings().then(s => {
+    api.getSettings().then(s => {
       if (s.emailConfig) {
         setConfig(s.emailConfig)
         const p = PROVIDERS.find(p => p.host === s.emailConfig.host)
@@ -92,14 +93,14 @@ export default function EmailSettings({ onClose }) {
   const handleTest = async () => {
     setTesting(true)
     setTestResult(null)
-    const res = await window.electronAPI.testEmail(config)
+    const res = await api.testEmail(config)
     setTesting(false)
     setTestResult(res)
   }
 
   const handleSave = async () => {
     setSaving(true)
-    await window.electronAPI.setSetting('emailConfig', config)
+    await api.setSetting('emailConfig', config)
     setSaving(false)
     onClose()
   }

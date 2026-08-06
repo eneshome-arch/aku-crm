@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useRef } from 'react'
 import { X, Mail, Send, CheckCircle, XCircle, Eye, Users, FileText, AlertCircle, Settings, Save, FolderOpen, Trash2, Plus, History, RefreshCw } from 'lucide-react'
 import EmailTemplateBuilder from './EmailTemplateBuilder'
@@ -89,13 +90,13 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
   const lastResults = useRef([])
 
   const loadCampaigns = async () => {
-    const res = await window.electronAPI.campaignsList(currentUser.id)
+    const res = await api.campaignsList(currentUser.id)
     if (res.success) setCampaigns(res.campaigns)
   }
 
   // Vorlagen + Kampagnen laden
   useEffect(() => {
-    window.electronAPI.getSettings().then(s => {
+    api.getSettings().then(s => {
       if (s.emailTemplates) setSavedTemplates(s.emailTemplates)
     })
     loadCampaigns()
@@ -106,7 +107,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
     const tpl = { id: Date.now(), name: saveTemplateName.trim(), subject, body, bodyJson: bodyJson || null, createdAt: new Date().toISOString() }
     const updated = [...savedTemplates, tpl]
     setSavedTemplates(updated)
-    await window.electronAPI.setSetting('emailTemplates', updated)
+    await api.setSetting('emailTemplates', updated)
     setSaveTemplateName('')
     setShowSaveInput(false)
   }
@@ -121,7 +122,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
   const deleteTemplate = async (id) => {
     const updated = savedTemplates.filter(t => t.id !== id)
     setSavedTemplates(updated)
-    await window.electronAPI.setSetting('emailTemplates', updated)
+    await api.setSetting('emailTemplates', updated)
   }
 
   const importHtml = (e) => {
@@ -162,7 +163,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
       text: renderTemplate(body.replace(/<[^>]+>/g, ''), c, emailConfig?.senderName || emailConfig?.email),
     }))
 
-    const res = await window.electronAPI.sendEmails(emailConfig, recipients)
+    const res = await api.sendEmails(emailConfig, recipients)
     setSending(false)
     if (res.results) {
       setResults(res.results)
@@ -176,7 +177,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
   const saveCampaign = async (name) => {
     const n = (name || saveCampaignName).trim()
     if (!n) return
-    await window.electronAPI.campaignsSave({
+    await api.campaignsSave({
       userId: currentUser.id,
       name: n,
       subject,
@@ -191,12 +192,12 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
 
   const openCampaignDetail = async (campaign) => {
     setCampaignDetail(campaign)
-    const res = await window.electronAPI.campaignsGet(campaign.id)
+    const res = await api.campaignsGet(campaign.id)
     if (res.success) setCampaignDetailData(res.campaign)
   }
 
   const deleteCampaign = async (id) => {
-    await window.electronAPI.campaignsDelete(id)
+    await api.campaignsDelete(id)
     setCampaignDetail(null)
     setCampaignDetailData(null)
     loadCampaigns()

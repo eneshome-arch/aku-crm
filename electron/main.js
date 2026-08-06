@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, systemPreferences, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, systemPreferences, dialog, Menu } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const https = require('https')
@@ -755,7 +755,24 @@ function createWindow() {
     },
   })
 
-  win.setMenuBarVisibility(false)
+  // macOS App-Menü mit Standard-Shortcuts (Cmd+C/V/X/A/Z)
+  const template = [
+    ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
+    { role: 'editMenu' },
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+
+  // Rechtsklick-Kontextmenü
+  win.webContents.on('context-menu', (e, params) => {
+    const menu = Menu.buildFromTemplate([
+      { role: 'cut', label: 'Ausschneiden' },
+      { role: 'copy', label: 'Kopieren' },
+      { role: 'paste', label: 'Einfügen' },
+      { type: 'separator' },
+      { role: 'selectAll', label: 'Alles auswählen' },
+    ])
+    menu.popup()
+  })
 
   // Maximize-State-Änderungen ans Frontend melden
   win.on('maximize', () => win.webContents.send('window:maximized', true))

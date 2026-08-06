@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Plus, FileText, Trash2, Download, Save, Eye, Edit3, ChevronLeft, X, Search, UserCheck, RefreshCw } from 'lucide-react'
 
@@ -80,6 +81,18 @@ const EINRICHTUNG_TYPEN = {
       { qualifikation: 'Heilerziehungspfleger/in', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Pädagogische Betreuung, Pflege', preis: '51,80' },
       { qualifikation: 'Sozialpädagoge/in', badge: 'B.A. / Diplom', badgeColor: 'blue', einsatz: 'Soziale Arbeit, Gruppenleitung', preis: '48,00' },
       { qualifikation: 'Betreuungshelfer/in', badge: 'Qualifiziert', badgeColor: 'gray', einsatz: 'Alltagsbegleitung, Assistenz', preis: '33,00' },
+    ],
+  },
+  logistik: {
+    label: '🚛 Logistikunternehmen',
+    subjectTitle: 'Zuverlässiges Lagerpersonal\nfür Ihr Unternehmen in Hannover',
+    introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im Bereich Lager, Logistik und Kommissionierung.',
+    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die flexible Überlassung von Fach- und Hilfskräften für Logistik, Lager und Versand. Unsere Mitarbeiterinnen und Mitarbeiter sind erfahren im Umgang mit Warenwirtschaftssystemen, Kommissionierung und Versandabwicklung – und stehen Ihnen auch kurzfristig zur Verfügung, um saisonale Spitzen oder Personalengpässe zuverlässig abzufangen.',
+    highlightText: 'Flexibel skalieren ohne Personalrisiko – ob Saisonspitze, Großauftrag oder kurzfristiger Ausfall. Sie erhalten einsatzbereites, erfahrenes Lagerpersonal genau dann, wenn Sie es brauchen.',
+    pricing: [
+      { qualifikation: 'Lagerlogistiker/in', badge: 'Fachkraft', badgeColor: 'green', einsatz: 'Wareneingang, Kommissionierung, Versand', preis: '28,50' },
+      { qualifikation: 'Staplerfahrer/in', badge: 'Staplerschein', badgeColor: 'blue', einsatz: 'Stapler, Ein-/Auslagerung', preis: '30,00' },
+      { qualifikation: 'Lagerhelfer/in', badge: 'Hilfskraft', badgeColor: 'gray', einsatz: 'Verpackung, Sortierung, Versand', preis: '22,50' },
     ],
   },
 }
@@ -348,13 +361,13 @@ export default function AngeboteModule({ currentUser }) {
 
   const loadOffers = useCallback(async () => {
     if (!currentUser?.id) return
-    const res = await window.electronAPI.offersList(currentUser.id)
+    const res = await api.offersList(currentUser.id)
     if (res.success) setOffers(res.offers)
   }, [currentUser])
 
   const loadContacts = useCallback(async () => {
     if (!currentUser?.id) return
-    const res = await window.electronAPI.query(
+    const res = await api.query(
       `SELECT id, company_name, first_name, last_name, address, city, postal_code FROM contacts WHERE user_id=$1 ORDER BY company_name ASC`,
       [currentUser.id]
     )
@@ -365,7 +378,7 @@ export default function AngeboteModule({ currentUser }) {
     loadOffers()
     loadContacts()
     async function loadCompany() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.companyProfile) setCompanyProfile(s.companyProfile)
     }
     loadCompany()
@@ -465,7 +478,7 @@ export default function AngeboteModule({ currentUser }) {
         '||',
         selected.introText,
       ].join('\n')
-      const res = await window.electronAPI.offersSave({
+      const res = await api.offersSave({
         id: selected.id,
         userId: currentUser.id,
         contactId: selected.contactId || null,
@@ -498,7 +511,7 @@ export default function AngeboteModule({ currentUser }) {
 
   const handleDelete = async (offerId) => {
     if (!confirm('Angebot löschen?')) return
-    const res = await window.electronAPI.offersDelete(offerId, currentUser.id)
+    const res = await api.offersDelete(offerId, currentUser.id)
     if (res.success) {
       await loadOffers()
       if (selected?.id === offerId) setSelected(null)
@@ -512,7 +525,7 @@ export default function AngeboteModule({ currentUser }) {
     try {
       const html = generateHTML(selected, companyProfile)
       const filename = `Angebot_${selected.recipientCompany || 'Zeitblick'}_${selected.offerNumber || new Date().toISOString().slice(0, 10)}.pdf`
-      const res = await window.electronAPI.offersExportPdf({ html, filename })
+      const res = await api.offersExportPdf({ html, filename })
       if (res.success) showToast('PDF gespeichert und geöffnet')
       else if (res.error !== 'Abgebrochen') showToast(res.error || 'PDF-Fehler', 'error')
     } finally {

@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect, useRef } from 'react'
 import { Mail, CheckCircle, XCircle, Eye, EyeOff, ChevronDown, User, MapPin, LogOut, Moon, Sun, Bell, Globe, Camera, Building2, Phone, Database, Upload, ArrowUp, ArrowDown, X, Plus, HardDrive, FileText } from 'lucide-react'
 
@@ -117,7 +118,7 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
 
   useEffect(() => {
     async function loadAvatar() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.[`avatar_${currentUser?.id}`]) setAvatar(s[`avatar_${currentUser?.id}`])
     }
     loadAvatar()
@@ -130,14 +131,14 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
     reader.onload = (ev) => {
       const b64 = ev.target.result
       setAvatar(b64)
-      window.electronAPI?.setSetting?.(`avatar_${currentUser?.id}`, b64)
+      api.setSetting?.(`avatar_${currentUser?.id}`, b64)
     }
     reader.readAsDataURL(file)
   }
 
   const handleSave = async () => {
     setSaving(true)
-    const res = await window.electronAPI.updateProfile(currentUser.id, {
+    const res = await api.updateProfile(currentUser.id, {
       name,
       city,
       lat: coords.lat,
@@ -266,7 +267,7 @@ function CompanySection() {
 
   useEffect(() => {
     async function load() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.companyProfile) setData(d => ({ ...d, ...s.companyProfile }))
     }
     load()
@@ -284,7 +285,7 @@ function CompanySection() {
 
   const handleSave = async () => {
     setSaving(true)
-    await window.electronAPI?.setSetting?.('companyProfile', data)
+    await api.setSetting?.('companyProfile', data)
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
@@ -466,7 +467,7 @@ function CallsSection() {
 
   useEffect(() => {
     async function load() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.callSettings) {
         const cs = s.callSettings
         if (cs.numberPriority) setNumberPriority(cs.numberPriority)
@@ -486,7 +487,7 @@ function CallsSection() {
       script,
       ...overrides,
     }
-    await window.electronAPI?.setSetting?.('callSettings', data)
+    await api.setSetting?.('callSettings', data)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
@@ -662,13 +663,13 @@ function EmailSection({ currentUser, onProfileUpdated }) {
   const handleTest = async () => {
     setTesting(true)
     setTestResult(null)
-    const res = await window.electronAPI.testEmail(config)
+    const res = await api.testEmail(config)
     setTesting(false)
     setTestResult(res)
   }
 
   const handleSave = async () => {
-    const res = await window.electronAPI.updateProfile(currentUser.id, {
+    const res = await api.updateProfile(currentUser.id, {
       name: currentUser.name,
       city: currentUser.city,
       lat: currentUser.lat,
@@ -909,7 +910,7 @@ function NotificationsSection() {
 
   useEffect(() => {
     async function load() {
-      const s = await window.electronAPI?.getSettings?.()
+      const s = await api.getSettings?.()
       if (s?.notifications) setPrefs(p => ({ ...p, ...s.notifications }))
     }
     load()
@@ -918,7 +919,7 @@ function NotificationsSection() {
   const toggle = (key) => {
     const next = { ...prefs, [key]: !prefs[key] }
     setPrefs(next)
-    window.electronAPI?.setSetting?.('notifications', next)
+    api.setSetting?.('notifications', next)
   }
 
   const items = [
@@ -966,7 +967,7 @@ function BackupSection() {
     setExporting(true)
     setStatus(null)
     try {
-      const rows = await window.electronAPI?.query?.('SELECT * FROM contacts')
+      const rows = await api.query?.('SELECT * FROM contacts')
       if (!rows || rows.length === 0) {
         setStatus({ type: 'warn', msg: 'Keine Kontakte zum Exportieren vorhanden.' })
         setExporting(false)
@@ -1021,7 +1022,7 @@ function BackupSection() {
           const cols = Object.keys(row).filter(k => k !== 'id')
           const vals = cols.map(k => row[k])
           const placeholders = cols.map(() => '?').join(', ')
-          await window.electronAPI?.query?.(
+          await api.query?.(
             `INSERT INTO contacts (${cols.join(', ')}) VALUES (${placeholders})`,
             vals
           )
@@ -1045,7 +1046,7 @@ function BackupSection() {
       const backup = { timestamp: new Date().toISOString(), tables: {} }
       for (const table of tables) {
         try {
-          const rows = await window.electronAPI?.query?.(`SELECT * FROM ${table}`)
+          const rows = await api.query?.(`SELECT * FROM ${table}`)
           backup.tables[table] = rows || []
         } catch {
           backup.tables[table] = []

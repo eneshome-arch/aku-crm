@@ -1,19 +1,27 @@
+import { api } from '../api'
 import { useState, useEffect, useRef } from 'react'
 import { Eye, EyeOff, MapPin, Fingerprint, ChevronRight, LogIn } from 'lucide-react'
 
-const platform = window.electronAPI?.platform || 'darwin'
+const platform = api.platform || 'darwin'
 const isMac = platform === 'darwin'
 
-// Session in electron-store speichern/lesen
+const isElectron = !!window.electronAPI
+// Session: electron-store (Electron) or localStorage (Web)
 async function getSavedSession() {
-  const s = await window.electronAPI.getSettings()
-  return s.savedSession || null
+  if (isElectron) {
+    const s = await api.getSettings()
+    return s?.savedSession || null
+  }
+  const raw = localStorage.getItem('aku_session')
+  return raw ? JSON.parse(raw) : null
 }
 async function saveSession(userId, email, name) {
-  await window.electronAPI.setSetting('savedSession', { userId, email, name })
+  if (isElectron) return api.setSetting('savedSession', { userId, email, name })
+  localStorage.setItem('aku_session', JSON.stringify({ userId, email, name }))
 }
 async function clearSession() {
-  await window.electronAPI.setSetting('savedSession', null)
+  if (isElectron) return api.setSetting('savedSession', null)
+  localStorage.removeItem('aku_session')
 }
 
 function CityAutocomplete({ value, onChange, onSelect }) {
@@ -88,13 +96,13 @@ function TouchIdScreen({ session, onLogin, onSwitchAccount }) {
   const handleTouchId = async () => {
     setStatus('loading')
     setError('')
-    const res = await window.electronAPI.touchId('Bei Aku CRM anmelden')
+    const res = await api.touchId('Bei Aku CRM anmelden')
     if (!res.success) {
       setStatus('error')
       setError('Touch ID fehlgeschlagen. Versuch es erneut.')
       return
     }
-    const userRes = await window.electronAPI.getUserById(session.userId)
+    const userRes = await api.getUserById(session.userId)
     if (!userRes.success) {
       setStatus('error')
       setError('Session abgelaufen. Bitte neu anmelden.')
@@ -171,7 +179,7 @@ function LoginForm({ prefillEmail, onLogin }) {
     setLoading(true)
     try {
       if (mode === 'login') {
-        const res = await window.electronAPI.login({ email: form.email, password: form.password })
+        const res = await api.login({ email: form.email, password: form.password })
         if (res.success) {
           if (rememberMe) await saveSession(res.user.id, res.user.email, res.user.name)
           else await clearSession()
@@ -181,7 +189,7 @@ function LoginForm({ prefillEmail, onLogin }) {
         }
       } else {
         if (!form.name.trim()) { setError('Bitte Namen eingeben.'); setLoading(false); return }
-        const res = await window.electronAPI.register({
+        const res = await api.register({
           name: form.name, email: form.email, password: form.password,
           city: form.city, lat: form.lat, lon: form.lon,
           address: form.address, birthdate: form.birthdate || null,
@@ -259,7 +267,7 @@ function LoginForm({ prefillEmail, onLogin }) {
           )}
         </div>
         <span className="text-sm text-gray-600">
-          {isMac ? 'Angemeldet bleiben (Touch ID)' : 'E-Mail merken'}
+          {isMac ? 'Angemeldet bleiben (Touch ID)' : 'Angemeldet bleiben'}
         </span>
       </label>
 
@@ -303,10 +311,21 @@ export default function Login({ onLogin }) {
   const [savedSession, setSavedSession] = useState(null)
 
   useEffect(() => {
-    getSavedSession().then(session => {
+    getSavedSession().then(async (session) => {
       if (session?.userId && isMac) {
         setSavedSession(session)
         setScreen('touchid')
+      } else if (session?.userId && !isElectron) {
+        // Web: try auto-login with JWT cookie
+        try {
+          const res = await api.getUserById(session.userId)
+          if (res.success && res.user) {
+            onLogin(res.user)
+            return
+          }
+        } catch {}
+        setSavedSession(session)
+        setScreen('form')
       } else {
         setSavedSession(session)
         setScreen('form')

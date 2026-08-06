@@ -1,3 +1,4 @@
+import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { X, Mail, MapPin, Building2, TrendingUp, PhoneCall, AlertTriangle, Clock, Star, CakeSlice, Home, Shield } from 'lucide-react'
 
@@ -58,7 +59,7 @@ export default function AdminUserDetail({ userId, onClose }) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    window.electronAPI.adminGetUserDetail(userId).then(res => {
+    api.adminGetUserDetail(userId).then(res => {
       if (res.success) setData(res)
       else setError(res.error)
       setLoading(false)
