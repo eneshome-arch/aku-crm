@@ -81,7 +81,7 @@ router.post('/pdf', async (req, res) => {
     const { html, filename } = req.body
     let puppeteer
     try {
-      puppeteer = require('puppeteer')
+      puppeteer = require('puppeteer-core')
     } catch {
       return res.status(500).json({ success: false, error: 'Puppeteer nicht installiert' })
     }

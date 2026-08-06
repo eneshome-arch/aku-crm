@@ -4,6 +4,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY src/ ./src/
 COPY index.html tailwind.config.js postcss.config.js vite.web.config.js ./
+ARG VITE_API_URL=https://api.zeitblick-personal.de
+ENV VITE_API_URL=$VITE_API_URL
 RUN npx vite build --config vite.web.config.js
 
 FROM nginx:alpine
