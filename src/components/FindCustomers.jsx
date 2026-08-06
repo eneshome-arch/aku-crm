@@ -98,7 +98,14 @@ export default function FindCustomers({ userId, userLat, userLon, onAddContact, 
     setResults([])
     try {
       const query = buildOverpassQuery(userLat || 52.3759, userLon || 9.7320)
-      const data = await api.overpass(query)
+      const [data, existing] = await Promise.all([
+        api.overpass(query),
+        api.query('SELECT company_name, address FROM contacts WHERE user_id=$1', [userId]),
+      ])
+      const existingKeys = new Set(
+        (existing.rows || []).map(c => (c.company_name || '') + (c.address || ''))
+      )
+      setAdded(existingKeys)
       const parsed = parseResults(data.elements || [])
       setResults(parsed)
       if (parsed.length === 0) setError('Keine Ergebnisse gefunden.')
