@@ -184,7 +184,8 @@ function generateHTML(offer, company = {}) {
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1e293b; background:#fff; line-height:1.6; }
-    .page { width:210mm; height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; }
+    .page { width:210mm; min-height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; position:relative; }
+    .page-2 { width:210mm; min-height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; page-break-before:always; }
     .header { background:#0f172a; padding:26px 40px 22px; display:flex; justify-content:space-between; align-items:flex-end; }
     .header-logo img { height:40px; width:auto; display:block; }
     .header-tagline { font-size:8pt; color:rgba(255,255,255,0.45); letter-spacing:0.12em; text-transform:uppercase; margin-top:7px; }
@@ -236,7 +237,11 @@ function generateHTML(offer, company = {}) {
     .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:11px 40px; display:flex; justify-content:space-between; align-items:center; margin-top:auto; }
     .footer p { font-size:7.5pt; color:#94a3b8; line-height:1.6; }
     .footer .footer-brand { font-weight:700; color:#475569; font-size:8pt; }
-    @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .page { margin:0; width:100%; } @page { margin:0; size:A4; } }
+    .page-2-header { background:#0f172a; padding:14px 40px; display:flex; justify-content:space-between; align-items:center; }
+    .page-2-header span { color:rgba(255,255,255,0.7); font-size:8.5pt; }
+    .page-2-header strong { color:#fff; font-weight:600; font-size:9pt; }
+    .page-2-accent { height:2px; background:linear-gradient(to right,${c.accentColor},#06b6d4); }
+    @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .page, .page-2 { margin:0; width:100%; } @page { margin:0; size:A4; } }
   </style>
 </head>
 <body>
@@ -306,6 +311,24 @@ function generateHTML(offer, company = {}) {
       </div>
     </div>
 
+  </div>
+
+  <div class="footer">
+    <div><p class="footer-brand">${c.name}</p><p>${c.address}</p></div>
+    <div style="text-align:center"><p>Tel. ${c.phone}</p><p>${c.email}</p></div>
+    <div style="text-align:right"><p>${c.website}</p>${c.ustId ? `<p>USt-IdNr. ${c.ustId}</p>` : ''}</div>
+  </div>
+</div>
+
+<!-- Seite 2 -->
+<div class="page-2">
+  <div class="page-2-header">
+    <span><strong>${c.name}</strong> · Angebot ${offer.offerNumber || ''}</span>
+    <span>Seite 2 von 2</span>
+  </div>
+  <div class="page-2-accent"></div>
+
+  <div class="body">
     <div class="section">
       <div class="section-title">Abrechnungs- &amp; Zahlungsbedingungen</div>
       <div class="terms-grid">
@@ -321,6 +344,16 @@ function generateHTML(offer, company = {}) {
       <div class="validity-box">
         <div><div class="v-label">Gültig bis</div><div class="v-date">${formatDateDE(offer.validUntil)}</div></div>
         <div class="v-note">Nach Ablauf erstellen wir Ihnen gerne ein aktualisiertes Angebot.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Unsere Leistungen im Überblick</div>
+      <div class="terms-grid">
+        <div class="term-item"><div class="term-label">Personalauswahl</div><div class="term-value">Sorgfältige Vorauswahl & Qualifikationsprüfung aller eingesetzten Mitarbeiter</div></div>
+        <div class="term-item"><div class="term-label">Flexibilität</div><div class="term-value">Kurzfristiger Einsatz auch bei spontanem Bedarf – deutschlandweit verfügbar</div></div>
+        <div class="term-item"><div class="term-label">Compliance</div><div class="term-value">Vollständig AÜG-konform, alle gesetzlichen Vorgaben werden eingehalten</div></div>
+        <div class="term-item"><div class="term-label">Betreuung</div><div class="term-value">Persönlicher Ansprechpartner für Sie & unsere Mitarbeiter vor Ort</div></div>
       </div>
     </div>
 
@@ -829,9 +862,9 @@ export default function AngeboteModule({ currentUser }) {
               </div>
             ) : (
               <div className="flex items-start justify-center p-6 bg-gray-200 min-h-full">
-                <div className="shadow-2xl" style={{ transform: 'scale(0.72)', transformOrigin: 'top center', marginBottom: '-200px' }}>
+                <div className="shadow-2xl" style={{ transform: 'scale(0.72)', transformOrigin: 'top center', marginBottom: '-400px' }}>
                   <iframe key={JSON.stringify(selected)} srcDoc={generateHTML(selected, companyProfile)}
-                    style={{ width: '210mm', height: '297mm', border: 'none', display: 'block', background: '#fff' }}
+                    style={{ width: '210mm', height: '594mm', border: 'none', display: 'block', background: '#fff' }}
                     title="Angebot Vorschau" />
                 </div>
               </div>
