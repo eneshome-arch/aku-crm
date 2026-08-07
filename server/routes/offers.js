@@ -36,16 +36,19 @@ router.post('/', async (req, res) => {
       )
       res.json({ success: true, offer: result.rows[0] })
     } else {
-      // Generate number
+      // Use provided number or auto-generate
       const docType = d.docType || 'angebot'
-      const prefix = DOC_PREFIXES[docType] || 'ZB'
-      const year = new Date().getFullYear()
-      const maxRes = await pool.query(
-        `SELECT MAX(CAST(SPLIT_PART(offer_number, '-', 3) AS INTEGER)) as max_num FROM offers WHERE user_id=$1 AND doc_type=$2 AND offer_number LIKE $3`,
-        [d.userId, docType, `${prefix}-${year}-%`]
-      )
-      const num = (parseInt(maxRes.rows[0].max_num) || 0) + 1
-      const offerNumber = `${prefix}-${year}-${String(num).padStart(3, '0')}`
+      let offerNumber = d.offerNumber
+      if (!offerNumber) {
+        const prefix = DOC_PREFIXES[docType] || 'ZB'
+        const year = new Date().getFullYear()
+        const maxRes = await pool.query(
+          `SELECT MAX(CAST(SPLIT_PART(offer_number, '-', 3) AS INTEGER)) as max_num FROM offers WHERE user_id=$1 AND doc_type=$2 AND offer_number LIKE $3`,
+          [d.userId, docType, `${prefix}-${year}-%`]
+        )
+        const num = (parseInt(maxRes.rows[0].max_num) || 0) + 1
+        offerNumber = `${prefix}-${year}-${String(num).padStart(3, '0')}`
+      }
 
       const result = await pool.query(
         `INSERT INTO offers (user_id, offer_number, title, items, notes, tax_rate, subtotal, tax_amount, total,
