@@ -681,7 +681,7 @@ export default function AngeboteModule({ currentUser }) {
                         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input ref={contactSearchRef} type="text" value={contactSearch}
                           onChange={e => { setContactSearch(e.target.value); setShowContactDropdown(true) }}
-                          onFocus={() => setShowContactDropdown(true)}
+                          onFocus={() => { loadContacts(); setShowContactDropdown(true) }}
                           onBlur={() => setTimeout(() => setShowContactDropdown(false), 150)}
                           placeholder="Kontakt suchen und auswählen…"
                           className="w-full pl-8 pr-3 py-2 border border-blue-200 bg-blue-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
