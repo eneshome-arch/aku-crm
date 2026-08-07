@@ -13,10 +13,10 @@ const STATUS_LABELS = {
 const EINRICHTUNG_TYPEN = {
   pflegeheim: {
     label: '🏠 Pflegeheim / Seniorenzentrum',
-    subjectTitle: 'Flexibles Pflegepersonal\nfür Ihre Einrichtung in Hannover',
+    subjectTitle: 'Flexibles Pflegepersonal\nfür Ihre Einrichtung',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im Bereich der stationären Alten- und Langzeitpflege.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die Überlassung von qualifiziertem Pflegepersonal an Einrichtungen der stationären und ambulanten Pflege. Unsere Mitarbeiterinnen und Mitarbeiter werden sorgfältig ausgewählt, sind examiniert oder entsprechend qualifiziert und stehen kurzfristig zur Verfügung – damit Sie Engpässe schnell und zuverlässig überbrücken können.',
-    highlightText: 'Kein Personalrisiko, keine Lohnnebenkosten, volle Flexibilität. Sie erhalten einsatzbereites Personal genau dann, wenn Sie es brauchen – für einzelne Schichten oder längere Einsätze.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die Überlassung von qualifiziertem Pflegepersonal an Einrichtungen der stationären und ambulanten Pflege. Unsere Mitarbeiterinnen und Mitarbeiter werden sorgfältig ausgewählt, sind examiniert oder entsprechend qualifiziert und stehen Ihnen bundesweit kurzfristig zur Verfügung – damit Sie Engpässe schnell und zuverlässig überbrücken können.',
+    highlightText: 'Kein Personalrisiko, keine Lohnnebenkosten, volle Flexibilität. Sie erhalten einsatzbereites Personal genau dann, wenn Sie es brauchen – für einzelne Schichten oder längere Einsätze, deutschlandweit.',
     pricing: [
       { qualifikation: 'Examinierte Pflegefachkraft', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Grund- & Behandlungspflege', preis: '51,80' },
       { qualifikation: 'Pflegehilfskraft', badge: '1-jährig / Helfer', badgeColor: 'blue', einsatz: 'Grundpflege, Betreuung', preis: '36,60' },
@@ -25,10 +25,10 @@ const EINRICHTUNG_TYPEN = {
   },
   krankenhaus: {
     label: '🏥 Krankenhaus / Klinik',
-    subjectTitle: 'Qualifiziertes Pflegepersonal\nfür Ihre Klinik in Hannover',
+    subjectTitle: 'Qualifiziertes Pflegepersonal\nfür Ihre Klinik',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im Bereich der Gesundheits- und Krankenpflege.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die kurzfristige Überlassung von examinierten Pflegefachkräften und Krankenpflegehelfern an Krankenhäuser und Kliniken. Unsere Mitarbeiterinnen und Mitarbeiter sind stationserfahren, verfügen über fundierte Fachkenntnisse und stehen Ihnen auch bei kurzfristigem Bedarf zuverlässig zur Verfügung.',
-    highlightText: 'Engpässe durch Krankheit, Urlaub oder erhöhtes Patientenaufkommen zuverlässig abfedern – mit examiniertem Fachpersonal, das von Tag eins an voll einsatzbereit ist.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die kurzfristige Überlassung von examinierten Pflegefachkräften und Krankenpflegehelfern an Krankenhäuser und Kliniken. Unsere Mitarbeiterinnen und Mitarbeiter sind stationserfahren, verfügen über fundierte Fachkenntnisse und stehen Ihnen bundesweit auch bei kurzfristigem Bedarf zuverlässig zur Verfügung.',
+    highlightText: 'Engpässe durch Krankheit, Urlaub oder erhöhtes Patientenaufkommen zuverlässig abfedern – mit examiniertem Fachpersonal, das von Tag eins an voll einsatzbereit ist. Bundesweiter Einsatz möglich.',
     pricing: [
       { qualifikation: 'Gesundheits- und Krankenpfleger/in', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Stationspflege, Akutversorgung', preis: '54,50' },
       { qualifikation: 'Krankenpflegehelfer/in', badge: '1-jährig', badgeColor: 'blue', einsatz: 'Grundpflege, Stationsunterstützung', preis: '38,00' },
@@ -37,10 +37,10 @@ const EINRICHTUNG_TYPEN = {
   },
   ambulant: {
     label: '🚗 Ambulanter Pflegedienst',
-    subjectTitle: 'Flexibles Personal\nfür Ihren Pflegedienst in Hannover',
+    subjectTitle: 'Flexibles Personal\nfür Ihren Pflegedienst',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung für Ihren ambulanten Pflegedienst.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die flexible Personalüberlassung für ambulante Pflegedienste in der Region Hannover und Umgebung. Unsere Mitarbeiterinnen und Mitarbeiter sind tourenerprobt, verfügen über fundierte pflegerische Kenntnisse und sind in der Lage, auch kurzfristig Touren zu übernehmen.',
-    highlightText: 'Touren lückenlos besetzen – auch bei plötzlichem Ausfall. Sie erhalten einsatzbereites, mobiles Pflegepersonal genau dann, wenn Sie es brauchen.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die flexible Personalüberlassung für ambulante Pflegedienste. Unsere Mitarbeiterinnen und Mitarbeiter sind tourenerprobt, verfügen über fundierte pflegerische Kenntnisse und sind in der Lage, auch kurzfristig Touren zu übernehmen – an jedem Standort in Deutschland.',
+    highlightText: 'Touren lückenlos besetzen – auch bei plötzlichem Ausfall. Sie erhalten einsatzbereites, mobiles Pflegepersonal genau dann, wenn Sie es brauchen, überall in Deutschland.',
     pricing: [
       { qualifikation: 'Pflegefachkraft ambulant', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Behandlungs- & Grundpflege, Touren', preis: '51,80' },
       { qualifikation: 'Pflegehilfskraft', badge: '1-jährig / Helfer', badgeColor: 'blue', einsatz: 'Grundpflege, Betreuung', preis: '36,60' },
@@ -49,10 +49,10 @@ const EINRICHTUNG_TYPEN = {
   },
   reha: {
     label: '🏋️ Reha-Klinik',
-    subjectTitle: 'Fachpersonal für Pflege & Therapie\nin Ihrer Reha-Einrichtung',
+    subjectTitle: 'Fachpersonal für Pflege & Therapie\nfür Ihre Reha-Einrichtung',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung von Pflege- und therapeutischem Fachpersonal für Ihre Rehabilitationsklinik.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die Überlassung von Pflege- und Fachpersonal an Rehabilitationskliniken und Therapieeinrichtungen. Unsere Mitarbeiterinnen und Mitarbeiter verfügen über Reha-Erfahrung und unterstützen Ihr Team sowohl in der Pflege als auch bei therapeutischen Hilfsleistungen.',
-    highlightText: 'Flexibel aufstocken, wenn Bedarf besteht – ohne Risiko und ohne langfristige Bindung. Wir stellen Ihnen qualifiziertes Personal für genau die Zeit, die Sie benötigen.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die Überlassung von Pflege- und Fachpersonal an Rehabilitationskliniken und Therapieeinrichtungen. Unsere Mitarbeiterinnen und Mitarbeiter verfügen über Reha-Erfahrung und unterstützen Ihr Team sowohl in der Pflege als auch bei therapeutischen Hilfsleistungen – bundesweit.',
+    highlightText: 'Flexibel aufstocken, wenn Bedarf besteht – ohne Risiko und ohne langfristige Bindung. Wir stellen Ihnen deutschlandweit qualifiziertes Personal für genau die Zeit, die Sie benötigen.',
     pricing: [
       { qualifikation: 'Pflegefachkraft', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Pflegeprozess, Patientenbetreuung', preis: '51,80' },
       { qualifikation: 'Therapeutische Fachkraft', badge: 'Fachqualifikation', badgeColor: 'blue', einsatz: 'Unterstützung Therapiemaßnahmen', preis: '48,00' },
@@ -63,8 +63,8 @@ const EINRICHTUNG_TYPEN = {
     label: '🧠 Psychiatrie / Sozialpsychiatrie',
     subjectTitle: 'Erfahrenes Fachpersonal\nfür Ihre psychiatrische Einrichtung',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im psychiatrischen und sozialpsychiatrischen Bereich.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister mit Erfahrung in der Überlassung von psychiatrieerfahrenem Pflege- und Betreuungspersonal. Unsere Mitarbeiterinnen und Mitarbeiter bringen sowohl pflegerische Fachkompetenz als auch Einfühlungsvermögen mit – für eine professionelle und menschliche Versorgung Ihrer Patientinnen und Patienten.',
-    highlightText: 'Zuverlässige Besetzung von Schichten auch in herausfordernden Versorgungssituationen – mit psychiatrieerfahrenem Personal, das Ihr Team von Anfang an entlastet.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover und Erfahrung in der Überlassung von psychiatrieerfahrenem Pflege- und Betreuungspersonal. Unsere Mitarbeiterinnen und Mitarbeiter bringen sowohl pflegerische Fachkompetenz als auch Einfühlungsvermögen mit – für eine professionelle und menschliche Versorgung Ihrer Patientinnen und Patienten, an jedem Standort in Deutschland.',
+    highlightText: 'Zuverlässige Besetzung von Schichten auch in herausfordernden Versorgungssituationen – mit psychiatrieerfahrenem Personal, das Ihr Team von Anfang an entlastet. Bundesweiter Einsatz.',
     pricing: [
       { qualifikation: 'Psychiatriefachpfleger/in', badge: 'Fachweiterbildung', badgeColor: 'green', einsatz: 'Psychiatrische Stationspflege', preis: '54,50' },
       { qualifikation: 'Gesundheits- und Krankenpfleger/in', badge: '3-jährig examiniert', badgeColor: 'blue', einsatz: 'Allgemeinpflege, Betreuung', preis: '51,80' },
@@ -73,10 +73,10 @@ const EINRICHTUNG_TYPEN = {
   },
   eingliederung: {
     label: '♿ Behinderteneinrichtung / Eingliederungshilfe',
-    subjectTitle: 'Pädagogisches und pflegerisches Personal\nfür Ihre Einrichtung in Hannover',
+    subjectTitle: 'Pädagogisches und pflegerisches Personal\nfür Ihre Einrichtung',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im Bereich der Eingliederungshilfe und Behindertenbetreuung.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die Überlassung von pädagogischem und pflegerischem Fachpersonal für Einrichtungen der Eingliederungshilfe. Unsere Mitarbeiterinnen und Mitarbeiter verfügen über Erfahrung in der Arbeit mit Menschen mit Behinderung und stehen Ihnen kurzfristig zur Verfügung.',
-    highlightText: 'Personallücken schnell schließen – mit qualifizierten Fachkräften, die Ihre Klientel und die besondere Herausforderung der Arbeit kennen und respektieren.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die Überlassung von pädagogischem und pflegerischem Fachpersonal für Einrichtungen der Eingliederungshilfe. Unsere Mitarbeiterinnen und Mitarbeiter verfügen über Erfahrung in der Arbeit mit Menschen mit Behinderung und stehen Ihnen bundesweit kurzfristig zur Verfügung.',
+    highlightText: 'Personallücken schnell schließen – mit qualifizierten Fachkräften, die Ihre Klientel und die besondere Herausforderung der Arbeit kennen und respektieren. Deutschlandweiter Einsatz.',
     pricing: [
       { qualifikation: 'Heilerziehungspfleger/in', badge: '3-jährig examiniert', badgeColor: 'green', einsatz: 'Pädagogische Betreuung, Pflege', preis: '51,80' },
       { qualifikation: 'Sozialpädagoge/in', badge: 'B.A. / Diplom', badgeColor: 'blue', einsatz: 'Soziale Arbeit, Gruppenleitung', preis: '48,00' },
@@ -85,10 +85,10 @@ const EINRICHTUNG_TYPEN = {
   },
   logistik: {
     label: '🚛 Logistikunternehmen',
-    subjectTitle: 'Zuverlässiges Lagerpersonal\nfür Ihr Unternehmen in Hannover',
+    subjectTitle: 'Zuverlässiges Lagerpersonal\nfür Ihr Unternehmen',
     introText: 'vielen Dank für Ihr Interesse und das angenehme Gespräch. Wie besprochen, erhalten Sie hiermit unser Angebot zur Arbeitnehmerüberlassung im Bereich Lager, Logistik und Kommissionierung.',
-    body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die flexible Überlassung von Fach- und Hilfskräften für Logistik, Lager und Versand. Unsere Mitarbeiterinnen und Mitarbeiter sind erfahren im Umgang mit Warenwirtschaftssystemen, Kommissionierung und Versandabwicklung – und stehen Ihnen auch kurzfristig zur Verfügung, um saisonale Spitzen oder Personalengpässe zuverlässig abzufangen.',
-    highlightText: 'Flexibel skalieren ohne Personalrisiko – ob Saisonspitze, Großauftrag oder kurzfristiger Ausfall. Sie erhalten einsatzbereites, erfahrenes Lagerpersonal genau dann, wenn Sie es brauchen.',
+    body2: 'Zeitblick Personalservice ist ein deutschlandweit tätiger Personaldienstleister mit Sitz in Hannover, spezialisiert auf die flexible Überlassung von Fach- und Hilfskräften für Logistik, Lager und Versand. Unsere Mitarbeiterinnen und Mitarbeiter sind erfahren im Umgang mit Warenwirtschaftssystemen, Kommissionierung und Versandabwicklung – und stehen Ihnen bundesweit auch kurzfristig zur Verfügung, um saisonale Spitzen oder Personalengpässe zuverlässig abzufangen.',
+    highlightText: 'Flexibel skalieren ohne Personalrisiko – ob Saisonspitze, Großauftrag oder kurzfristiger Ausfall. Sie erhalten einsatzbereites, erfahrenes Lagerpersonal genau dann, wenn Sie es brauchen – an jedem Standort in Deutschland.',
     pricing: [
       { qualifikation: 'Lagerhelfer/in', badge: 'Hilfskraft', badgeColor: 'gray', einsatz: 'Sortierung, Kommissionierung, Verpackung', preis: '25,50' },
       { qualifikation: 'Kommissionierer/in', badge: 'Erfahren', badgeColor: 'blue', einsatz: 'Wareneingang, Kommissionierung, Versand', preis: '27,00' },
