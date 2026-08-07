@@ -117,6 +117,12 @@ function newOffer(typ = 'pflegeheim') {
     body2: t.body2,
     highlightText: t.highlightText,
     pricing: t.pricing.map(r => ({ ...r })),
+    surcharges: [
+      { label: 'Überstunden', detail: 'ab der 40,01. Wochenstunde', value: '25' },
+      { label: 'Nachtzuschlag', detail: '23:00 – 06:00 Uhr', value: '35' },
+      { label: 'Sonntagszuschlag', detail: 'alle Stunden am Sonntag', value: '60' },
+      { label: 'Feiertagszuschlag', detail: 'alle Stunden an Feiertagen', value: '110' },
+    ],
     status: 'entwurf',
     notes: '',
   }
@@ -294,10 +300,9 @@ function generateHTML(offer, company = {}) {
     <div class="section">
       <div class="section-title">Zuschläge</div>
       <div class="surcharge-grid">
-        <div class="surcharge-item"><div class="surcharge-label">Überstunden<small>ab der 40,01. Wochenstunde</small></div><div class="surcharge-value">+ 25 %</div></div>
-        <div class="surcharge-item"><div class="surcharge-label">Nachtzuschlag<small>23:00 – 06:00 Uhr</small></div><div class="surcharge-value">+ 35 %</div></div>
-        <div class="surcharge-item"><div class="surcharge-label">Sonntagszuschlag<small>alle Stunden am Sonntag</small></div><div class="surcharge-value">+ 60 %</div></div>
-        <div class="surcharge-item"><div class="surcharge-label">Feiertagszuschlag<small>alle Stunden an Feiertagen</small></div><div class="surcharge-value">+ 110 %</div></div>
+        ${(offer.surcharges || []).map(s => `
+        <div class="surcharge-item"><div class="surcharge-label">${s.label}<small>${s.detail}</small></div><div class="surcharge-value">+ ${s.value} %</div></div>
+        `).join('')}
       </div>
     </div>
 
@@ -424,7 +429,15 @@ export default function AngeboteModule({ currentUser }) {
   }
 
   const handleSelectOffer = (o) => {
-    const items = Array.isArray(o.items) ? o.items : []
+    const rawItems = o.items || {}
+    const items = Array.isArray(rawItems) ? rawItems : (rawItems.pricing || [])
+    const savedSurcharges = Array.isArray(rawItems) ? null : (rawItems.surcharges || null)
+    const defaultSurcharges = [
+      { label: 'Überstunden', detail: 'ab der 40,01. Wochenstunde', value: '25' },
+      { label: 'Nachtzuschlag', detail: '23:00 – 06:00 Uhr', value: '35' },
+      { label: 'Sonntagszuschlag', detail: 'alle Stunden am Sonntag', value: '60' },
+      { label: 'Feiertagszuschlag', detail: 'alle Stunden an Feiertagen', value: '110' },
+    ]
     const typ = o.template && EINRICHTUNG_TYPEN[o.template] ? o.template : 'pflegeheim'
     const t = EINRICHTUNG_TYPEN[typ]
     // Parse stored intro_text: format is "name\ncompany\naddress\n||\nintroText"
@@ -461,6 +474,7 @@ export default function AngeboteModule({ currentUser }) {
       body2: t.body2,
       highlightText: t.highlightText,
       pricing: items.length ? items : t.pricing.map(r => ({ ...r })),
+      surcharges: savedSurcharges || defaultSurcharges,
       status: o.status || 'entwurf',
       notes: o.notes || '',
     })
@@ -485,7 +499,7 @@ export default function AngeboteModule({ currentUser }) {
         docType: 'angebot',
         offerNumber: selected.offerNumber,
         title: selected.recipientCompany || selected.recipientName || 'Angebot',
-        items: selected.pricing,
+        items: { pricing: selected.pricing, surcharges: selected.surcharges },
         notes: selected.notes,
         taxRate: 19,
         subtotal: 0, taxAmount: 0, total: 0,
@@ -537,6 +551,18 @@ export default function AngeboteModule({ currentUser }) {
   const updatePricingRow = (idx, field, value) => setSelected(s => ({
     ...s,
     pricing: s.pricing.map((r, i) => i === idx ? { ...r, [field]: value } : r),
+  }))
+  const updateSurchargeRow = (idx, field, value) => setSelected(s => ({
+    ...s,
+    surcharges: s.surcharges.map((r, i) => i === idx ? { ...r, [field]: value } : r),
+  }))
+  const addSurcharge = () => setSelected(s => ({
+    ...s,
+    surcharges: [...s.surcharges, { label: '', detail: '', value: '' }],
+  }))
+  const removeSurcharge = (idx) => setSelected(s => ({
+    ...s,
+    surcharges: s.surcharges.filter((_, i) => i !== idx),
   }))
 
   return (
@@ -763,6 +789,32 @@ export default function AngeboteModule({ currentUser }) {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </section>
+
+                {/* Zuschläge */}
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Zuschläge</h3>
+                    <button onClick={addSurcharge} className="text-xs text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1">
+                      <Plus size={12} /> Zuschlag hinzufügen
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {selected.surcharges.map((s, idx) => (
+                      <div key={idx} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3">
+                        <input type="text" value={s.label} onChange={e => updateSurchargeRow(idx, 'label', e.target.value)} placeholder="Bezeichnung" className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none focus:bg-blue-50 rounded px-2 py-1" />
+                        <input type="text" value={s.detail} onChange={e => updateSurchargeRow(idx, 'detail', e.target.value)} placeholder="Details (z.B. 23:00–06:00)" className="flex-1 text-sm text-gray-500 bg-transparent focus:outline-none focus:bg-blue-50 rounded px-2 py-1" />
+                        <div className="flex items-center gap-1">
+                          <span className="text-gray-400 text-xs">+</span>
+                          <input type="text" value={s.value} onChange={e => updateSurchargeRow(idx, 'value', e.target.value)} className="w-14 text-sm font-semibold text-gray-800 bg-transparent focus:outline-none focus:bg-blue-50 rounded px-1 text-right" />
+                          <span className="text-gray-400 text-xs">%</span>
+                        </div>
+                        <button onClick={() => removeSurcharge(idx)} className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </section>
 
