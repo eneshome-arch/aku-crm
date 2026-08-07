@@ -244,7 +244,7 @@ function generateHTML(offer, company = {}) {
   <div class="header">
     <div>
       <div class="header-logo">
-        ${c.logo ? `<img src="${c.logo}" alt="${c.name}" style="height:40px;width:auto;display:block">` : `<span style="color:white;font-size:18pt;font-weight:700;letter-spacing:-0.5px">${c.name}</span>`}
+        ${c.logo ? `<img src="${c.logo}" alt="${c.name}" style="height:auto;width:220px;display:block">` : `<span style="color:white;font-size:18pt;font-weight:700;letter-spacing:-0.5px">${c.name}</span>`}
       </div>
       <div class="header-tagline">${c.city ? c.name.split(' ')[0] + ' · ' + (company.city || 'Hannover') : ''}</div>
     </div>
