@@ -1170,13 +1170,13 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
   const emailConfigured = !!(currentUser?.email_config?.email && currentUser?.email_config?.password)
 
   return (
-    <div className="h-full flex overflow-hidden bg-gray-50">
-      {/* Linke Nav */}
-      <div className="w-56 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 pt-8">
-        <div className="px-5 mb-6">
+    <div className="h-full flex flex-col md:flex-row overflow-hidden bg-gray-50">
+      {/* Linke Nav — horizontal tabs on mobile, vertical sidebar on desktop */}
+      <div className="md:w-56 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex md:flex-col flex-shrink-0 md:pt-8">
+        <div className="hidden md:block px-5 mb-6">
           <h2 className="text-xl font-bold text-gray-900">Einstellungen</h2>
         </div>
-        <nav className="px-3 space-y-1 flex-1">
+        <nav className="flex md:flex-col md:px-3 md:space-y-1 md:flex-1 overflow-x-auto px-2 py-1 md:py-0 gap-1 md:gap-0">
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
             const showGreenDot = item.dot === 'green'
@@ -1185,14 +1185,14 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+                className={`whitespace-nowrap text-left px-3 py-2 md:py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 md:gap-3 ${
                   activeSection === item.id
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Icon size={16} className={activeSection === item.id ? 'text-blue-500' : 'text-gray-400'} />
-                <span className="flex-1">{item.label}</span>
+                <span className="hidden sm:inline flex-1">{item.label}</span>
                 {showGreenDot && (
                   <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
                 )}
@@ -1203,7 +1203,7 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
             )
           })}
         </nav>
-        <div className="px-3 pb-6">
+        <div className="hidden md:block px-3 pb-6">
           <button
             onClick={onLogout}
             className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"
@@ -1215,7 +1215,7 @@ export default function Settings({ currentUser, onProfileUpdated, onLogout, dark
       </div>
 
       {/* Rechter Inhalt */}
-      <div className="flex-1 overflow-y-auto p-8 pt-12">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 md:pt-12">
         {activeSection === 'profile' && (
           <ProfileSection currentUser={currentUser} onProfileUpdated={onProfileUpdated} />
         )}

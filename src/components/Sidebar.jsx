@@ -41,7 +41,7 @@ function isOverdue(dt) {
   return new Date(dt) < new Date()
 }
 
-export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, onOpenAngebote, onOpenKunden, currentView, isAdmin }) {
+export default function Sidebar({ contacts, selectedContact, onSelectContact, onShowDashboard, onAddContact, onFindCustomers, onStartCalling, onEmailMarketing, onOpenSettings, onOpenAdmin, onOpenAngebote, onOpenKunden, currentView, isAdmin, mobileOpen, onCloseMobile }) {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState(0)
 
@@ -56,7 +56,10 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
   })
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm">
+    <aside className={`w-72 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm flex-shrink-0
+      fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out
+      ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+      lg:relative lg:translate-x-0 lg:z-auto`}>
       {/* Title bar area — nur auf macOS für Traffic Lights */}
       {platform === 'darwin' ? (
         <div className="drag-region h-12 flex items-center px-4 pt-2 flex-shrink-0">

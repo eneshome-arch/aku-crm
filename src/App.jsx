@@ -1,6 +1,6 @@
 import { api } from './api'
 import { useState, useEffect, useCallback, Component } from 'react'
-import { AlertCircle, Database, ChevronLeft } from 'lucide-react'
+import { AlertCircle, Database, ChevronLeft, Menu, X } from 'lucide-react'
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
@@ -54,6 +54,7 @@ export default function App() {
   const [updateStatus, setUpdateStatus] = useState(null) // null | 'available' | 'ready'
   const [darkMode, setDarkMode] = useState(false)
   const [language, setLanguage] = useState('de')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const loadContacts = useCallback(async (userId) => {
     const uid = userId || currentUser?.id
@@ -167,6 +168,7 @@ export default function App() {
   const navigateTo = (newView) => {
     setViewHistory(h => [...h, view])
     setView(newView)
+    setSidebarOpen(false)
   }
 
   const goBack = () => {
@@ -185,6 +187,7 @@ export default function App() {
     setSelectedContact(null)
     setViewHistory([])
     setView('dashboard')
+    setSidebarOpen(false)
   }
 
   const handleContactSaved = async () => {
@@ -291,27 +294,40 @@ export default function App() {
           <button onClick={() => setUpdateStatus(null)} className="text-blue-200 hover:text-white text-xs">✕</button>
         </div>
       )}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
       <Sidebar
         contacts={contacts}
         selectedContact={selectedContact}
-        onSelectContact={handleSelectContact}
+        onSelectContact={(c) => { handleSelectContact(c); setSidebarOpen(false) }}
         onShowDashboard={handleShowDashboard}
-        onAddContact={() => setShowAddForm(true)}
-        onFindCustomers={() => setShowFindCustomers(true)}
-        onStartCalling={() => setShowCallList(true)}
-        onEmailMarketing={() => setShowEmailMarketing(true)}
+        onAddContact={() => { setShowAddForm(true); setSidebarOpen(false) }}
+        onFindCustomers={() => { setShowFindCustomers(true); setSidebarOpen(false) }}
+        onStartCalling={() => { setShowCallList(true); setSidebarOpen(false) }}
+        onEmailMarketing={() => { setShowEmailMarketing(true); setSidebarOpen(false) }}
         onOpenSettings={() => { setSelectedContact(null); navigateTo('settings') }}
         onOpenAdmin={() => { setSelectedContact(null); navigateTo('admin') }}
         onOpenAngebote={() => { setSelectedContact(null); navigateTo('angebote') }}
         onOpenKunden={() => { setSelectedContact(null); navigateTo('kunden') }}
         currentView={view}
         isAdmin={currentUser?.is_admin}
+        mobileOpen={sidebarOpen}
+        onCloseMobile={() => setSidebarOpen(false)}
       />
 
-      <main className="flex-1 overflow-hidden flex flex-col">
-        {view !== 'dashboard' && (
-          <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
+      <main className="flex-1 overflow-hidden flex flex-col min-w-0">
+        <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0 flex items-center gap-2">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+          {view !== 'dashboard' && (
             <button
               onClick={goBack}
               className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 text-sm font-medium transition-colors"
@@ -319,8 +335,11 @@ export default function App() {
               <ChevronLeft size={16} />
               Zurück
             </button>
-          </div>
-        )}
+          )}
+          {view === 'dashboard' && (
+            <span className="text-sm font-medium text-gray-500 lg:hidden">CRM Akquise</span>
+          )}
+        </div>
         <div className="flex-1 overflow-hidden">
         {view === 'dashboard' && (
           <Dashboard

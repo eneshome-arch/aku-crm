@@ -120,13 +120,13 @@ function KontakteView({ contacts, onSelectContact, search, setSearch, filterStat
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 flex-shrink-0">
+      <div className="px-4 md:px-6 pt-4 md:pt-6 pb-3 md:pb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-gray-900">{title}</h2>
         <p className="text-sm text-gray-500 mt-0.5">{contacts.length} Eintraege</p>
       </div>
 
       {/* Stats row */}
-      <div className="px-6 pb-4 flex gap-4 flex-shrink-0">
+      <div className="px-4 md:px-6 pb-3 md:pb-4 flex gap-3 md:gap-4 flex-shrink-0">
         <div className="bg-blue-50 rounded-xl px-4 py-2.5 flex items-center gap-2">
           <Users size={15} className="text-blue-500" />
           <span className="text-sm font-semibold text-blue-700">{contacts.length}</span>
@@ -140,7 +140,7 @@ function KontakteView({ contacts, onSelectContact, search, setSearch, filterStat
       </div>
 
       {/* Search */}
-      <div className="px-6 pb-3 flex-shrink-0">
+      <div className="px-4 md:px-6 pb-3 flex-shrink-0">
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -154,7 +154,7 @@ function KontakteView({ contacts, onSelectContact, search, setSearch, filterStat
       </div>
 
       {/* Filter row */}
-      <div className="px-6 pb-4 flex items-center gap-3 flex-shrink-0">
+      <div className="px-4 md:px-6 pb-4 flex flex-wrap items-center gap-2 md:gap-3 flex-shrink-0">
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(Number(e.target.value))}
@@ -183,7 +183,7 @@ function KontakteView({ contacts, onSelectContact, search, setSearch, filterStat
       </div>
 
       {/* Contact list */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-6">
         {sorted.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <Users size={32} className="mx-auto mb-3 opacity-50" />
@@ -229,7 +229,7 @@ function KontakteView({ contacts, onSelectContact, search, setSearch, filterStat
                     )}
                   </div>
                 </div>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0 ${STATUS_COLORS[contact.status] || STATUS_COLORS[1]}`}>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0 hidden sm:inline ${STATUS_COLORS[contact.status] || STATUS_COLORS[1]}`}>
                   {STATUS_LABELS[contact.status] || 'Unbekannt'}
                 </span>
                 <ChevronRight size={14} className="text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition-colors" />
@@ -499,14 +499,14 @@ export default function KundenCRM({ contacts, currentUser, onSelectContact }) {
   const kundenOnly = contacts.filter(c => c.status === 9)
 
   return (
-    <div className="h-full flex bg-gray-50">
-      {/* Left sub-navigation */}
-      <div className="w-48 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-        <div className="px-4 pt-6 pb-4">
+    <div className="h-full flex flex-col md:flex-row bg-gray-50">
+      {/* Sub-navigation: horizontal tabs on mobile, vertical sidebar on desktop */}
+      <div className="md:w-48 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex md:flex-col flex-shrink-0">
+        <div className="hidden md:block px-4 pt-6 pb-4">
           <h2 className="text-sm font-bold text-gray-900">Kunden & CRM</h2>
           <p className="text-xs text-gray-400 mt-0.5">{contacts.length} Kontakte gesamt</p>
         </div>
-        <nav className="px-2 flex-1">
+        <nav className="flex md:flex-col md:px-2 md:flex-1 overflow-x-auto px-2 py-1 md:py-0 gap-1">
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
             const active = subView === item.key
@@ -514,14 +514,14 @@ export default function KundenCRM({ contacts, currentUser, onSelectContact }) {
               <button
                 key={item.key}
                 onClick={() => setSubView(item.key)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2.5 mb-0.5 ${
+                className={`whitespace-nowrap text-left px-3 py-2 md:py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 md:gap-2.5 mb-0 md:mb-0.5 ${
                   active
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Icon size={15} />
-                {item.label}
+                <span className="hidden sm:inline">{item.label}</span>
               </button>
             )
           })}

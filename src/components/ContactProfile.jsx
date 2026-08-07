@@ -199,10 +199,10 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
         </div>
       </div>
 
-      <div className="px-8 py-6 max-w-3xl">
+      <div className="px-4 md:px-8 py-6 max-w-3xl">
         {/* Firmendaten */}
         <Section title="Firmendaten">
-          <div className="grid grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <Field label="Firmenname" value={form.company_name} editMode={editMode} onChange={set('company_name')} />
             <Field label="Branche" value={form.industry} editMode={editMode} onChange={set('industry')} />
             <Field label="Firmengröße" value={form.company_size} editMode={editMode} onChange={set('company_size')} />
@@ -215,7 +215,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
 
         {/* Ansprechpartner */}
         <Section title="Ansprechpartner">
-          <div className="grid grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <Field label="Vorname" value={form.first_name} editMode={editMode} onChange={set('first_name')} />
             <Field label="Nachname" value={form.last_name} editMode={editMode} onChange={set('last_name')} />
             <Field label="Position / Titel" value={form.position} editMode={editMode} onChange={set('position')} />
