@@ -40,11 +40,11 @@ router.post('/', async (req, res) => {
       const docType = d.docType || 'angebot'
       const prefix = DOC_PREFIXES[docType] || 'ZB'
       const year = new Date().getFullYear()
-      const countRes = await pool.query(
-        `SELECT COUNT(*) FROM offers WHERE user_id=$1 AND doc_type=$2 AND EXTRACT(YEAR FROM created_at)=$3`,
-        [d.userId, docType, year]
+      const maxRes = await pool.query(
+        `SELECT MAX(CAST(SPLIT_PART(offer_number, '-', 3) AS INTEGER)) as max_num FROM offers WHERE user_id=$1 AND doc_type=$2 AND offer_number LIKE $3`,
+        [d.userId, docType, `${prefix}-${year}-%`]
       )
-      const num = (parseInt(countRes.rows[0].count) || 0) + 1
+      const num = (parseInt(maxRes.rows[0].max_num) || 0) + 1
       const offerNumber = `${prefix}-${year}-${String(num).padStart(3, '0')}`
 
       const result = await pool.query(
