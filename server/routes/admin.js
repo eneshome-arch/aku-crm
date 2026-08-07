@@ -55,7 +55,7 @@ router.delete('/users/:id', async (req, res) => {
   }
 })
 
-router.put('/users/:id/password', async (req, res) => {
+router.post('/users/:id/password', async (req, res) => {
   try {
     const { newPassword } = req.body
     const pool = getPool()
