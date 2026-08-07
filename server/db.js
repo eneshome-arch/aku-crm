@@ -145,6 +145,18 @@ async function initDb() {
     )
   `)
 
+  // Offers column migrations (for tables created before these columns existed)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS company_name VARCHAR(255)`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS company_address TEXT`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS contact_person VARCHAR(255)`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS service_location TEXT DEFAULT ''`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS processor VARCHAR(255) DEFAULT ''`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS intro_text TEXT DEFAULT ''`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS template VARCHAR(30) DEFAULT 'zeitblick'`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS contact_id INTEGER REFERENCES contacts(id) ON DELETE SET NULL`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS doc_type VARCHAR(30) DEFAULT 'angebot'`)
+  await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS due_date DATE`)
+
   // Industry migration
   await p.query(`
     UPDATE contacts SET industry = CASE
