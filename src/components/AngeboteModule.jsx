@@ -567,8 +567,8 @@ export default function AngeboteModule({ currentUser }) {
 
   return (
     <div className="flex h-full bg-gray-50">
-      {/* LEFT */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+      {/* LEFT — hidden on mobile when an offer is selected */}
+      <div className={`w-full md:w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 ${selected ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-800 text-sm">Angebote</h2>
           <button onClick={handleNew} className="w-7 h-7 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center transition-colors" title="Neues Angebot">
@@ -605,7 +605,7 @@ export default function AngeboteModule({ currentUser }) {
 
       {/* RIGHT */}
       {!selected ? (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 hidden md:flex items-center justify-center">
           <div className="text-center text-gray-400">
             <FileText size={40} className="mx-auto mb-3 opacity-20" />
             <p className="text-sm font-medium">Angebot auswählen oder neu erstellen</p>
@@ -615,30 +615,30 @@ export default function AngeboteModule({ currentUser }) {
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar */}
-          <div className="bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><ChevronLeft size={18} /></button>
-              <span className="font-semibold text-gray-800 text-sm">{selected.recipientCompany || selected.recipientName || 'Neues Angebot'}</span>
-              {selected.id && <span className="text-xs text-gray-400">{selected.offerNumber}</span>}
+          <div className="bg-white border-b border-gray-200 px-3 md:px-4 py-2 flex flex-wrap items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 mr-auto min-w-0">
+              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"><ChevronLeft size={18} /></button>
+              <span className="font-semibold text-gray-800 text-sm truncate">{selected.recipientCompany || selected.recipientName || 'Neues Angebot'}</span>
+              {selected.id && <span className="text-xs text-gray-400 hidden sm:inline">{selected.offerNumber}</span>}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <select value={selected.status} onChange={e => updateField('status', e.target.value)}
                 className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500">
                 {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
               <div className="flex bg-gray-100 rounded-lg p-0.5">
-                <button onClick={() => setTab('editor')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'editor' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}>
-                  <Edit3 size={12} /> Bearbeiten
+                <button onClick={() => setTab('editor')} className={`flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'editor' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <Edit3 size={12} /> <span className="hidden sm:inline">Bearbeiten</span>
                 </button>
-                <button onClick={() => setTab('preview')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'preview' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}>
-                  <Eye size={12} /> Vorschau
+                <button onClick={() => setTab('preview')} className={`flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'preview' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <Eye size={12} /> <span className="hidden sm:inline">Vorschau</span>
                 </button>
               </div>
-              <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors disabled:opacity-50">
-                <Save size={12} />{saving ? 'Speichern…' : 'Speichern'}
+              <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors disabled:opacity-50">
+                <Save size={12} /><span className="hidden sm:inline">{saving ? 'Speichern…' : 'Speichern'}</span>
               </button>
-              <button onClick={handleExportPdf} disabled={exporting} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50">
-                <Download size={12} />{exporting ? 'Exportiere…' : 'Als PDF'}
+              <button onClick={handleExportPdf} disabled={exporting} className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50">
+                <Download size={12} /><span className="hidden sm:inline">{exporting ? 'Exportiere…' : 'PDF'}</span>
               </button>
             </div>
           </div>
@@ -646,12 +646,12 @@ export default function AngeboteModule({ currentUser }) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
             {tab === 'editor' ? (
-              <div className="max-w-2xl mx-auto p-6 space-y-6">
+              <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-5 md:space-y-6">
 
                 {/* Einrichtungstyp */}
                 <section>
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Einrichtungstyp</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {Object.entries(EINRICHTUNG_TYPEN).map(([key, t]) => (
                       <button
                         key={key}
