@@ -1,10 +1,20 @@
 # Aku CRM – Akquise & Angebote
 
-Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Marketing, Angebots- und Rahmenvertragserstellung.
+CRM für Zeitblick Personalservice. Akquiseanrufe, E-Mail-Marketing, Angebots- und Rahmenvertragserstellung.
+
+Verfügbar als **Electron Desktop-App** und als **Web-App** unter [app.zeitblick-personal.de](https://app.zeitblick-personal.de).
 
 ---
 
-## Download
+## Web-App
+
+| | |
+|---|---|
+| Frontend | [app.zeitblick-personal.de](https://app.zeitblick-personal.de) |
+| API | [api.zeitblick-personal.de](https://api.zeitblick-personal.de) |
+| Hosting | Coolify auf Hetzner |
+
+## Desktop-App Download
 
 **[→ Neueste Version herunterladen](https://github.com/eneshome-arch/aku-crm/releases/latest)**
 
@@ -22,9 +32,22 @@ Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Mark
 | | |
 |---|---|
 | Frontend | React + Vite + Tailwind CSS |
-| Backend | Electron (Main Process) |
-| Datenbank | PostgreSQL (Remote-Server via Hetzner/Coolify) |
+| Desktop | Electron (Main Process, IPC) |
+| API Server | Express.js (JWT Auth, Puppeteer PDF) |
+| Datenbank | PostgreSQL (Hetzner/Coolify) |
 | Updates | electron-updater (automatisch via GitHub Releases) |
+
+### Dual-Mode Architektur
+
+Die App läuft sowohl als Electron-App als auch im Browser. Ein API-Adapter wählt automatisch:
+
+- **Electron:** `window.electronAPI` → IPC-Calls an Main Process
+- **Browser:** `webAPI` → REST-Calls an Express-API
+
+```js
+// src/api/index.js
+export const api = window.electronAPI || webAPI
+```
 
 ---
 
@@ -33,33 +56,41 @@ Electron-App für Zeitblick Personalservice. CRM für Akquiseanrufe, E-Mail-Mark
 ```
 aku-crm/
 ├── electron/
-│   ├── main.js          # Electron Main Process, alle IPC-Handler, DB-Verbindung
-│   └── preload.js       # contextBridge – exposte API ans Frontend
+│   ├── main.js          # Electron Main Process, IPC-Handler, DB-Verbindung
+│   └── preload.js       # contextBridge – API ans Frontend
+├── server/
+│   ├── index.js         # Express Server (CORS, Helmet, Rate Limiting)
+│   ├── db.js            # PostgreSQL Pool + Migrationen
+│   ├── auth.js          # JWT Sign/Verify/Middleware
+│   └── routes/
+│       ├── auth.js      # Login, Register, Profil
+│       ├── query.js     # Raw SQL (JWT-geschützt)
+│       ├── offers.js    # Angebote CRUD + PDF (Puppeteer)
+│       ├── campaigns.js # E-Mail-Kampagnen
+│       ├── email.js     # SMTP Versand
+│       ├── admin.js     # Benutzerverwaltung
+│       ├── settings.js  # Web-Settings (JSONB)
+│       └── fetch.js     # URL-Scraping + Overpass Proxy
 ├── src/
-│   ├── App.jsx          # Root-Komponente, View-Routing, Navigation-History, globaler State
-│   ├── main.jsx         # React-Einstiegspunkt
-│   ├── index.css        # Tailwind-Basis + Dark Mode CSS
+│   ├── App.jsx          # Root-Komponente, View-Routing
+│   ├── api/
+│   │   ├── index.js     # api = electronAPI || webAPI
+│   │   └── webAPI.js    # REST-Adapter für alle API-Methoden
 │   └── components/
-│       ├── KundenCRM.jsx          # Kunden & CRM – Kontaktliste, Pipeline, Berichte
-│       ├── BelegeModule.jsx       # Belege-Übersicht (Angebote + Rahmenverträge)
-│       ├── AngeboteModule.jsx     # Angebote erstellen, bearbeiten, PDF-Export
-│       ├── RahmenvertragModule.jsx # Rahmenverträge erstellen und verwalten
-│       ├── Settings.jsx           # Einstellungen (Profil, Firmenprofil, E-Mail, Darstellung)
-│       ├── Sidebar.jsx            # Hauptnavigation (Dashboard, Kunden, Belege, Aktionen)
-│       ├── Dashboard.jsx          # Übersicht, Statistiken
-│       ├── ContactProfile.jsx     # Kontakt-Detailansicht
-│       ├── ContactForm.jsx        # Kontakt anlegen / bearbeiten
-│       ├── CallList.jsx           # Anruflisten-Auswahl
-│       ├── CallSession.jsx        # Aktive Anrufsession
-│       ├── FindCustomers.jsx      # Kundensuche via Overpass API (3 Fallback-Server)
+│       ├── KundenCRM.jsx          # Kontaktliste, Pipeline, Berichte
+│       ├── BelegeModule.jsx       # Belege-Übersicht
+│       ├── AngeboteModule.jsx     # Angebote + PDF-Export
+│       ├── RahmenvertragModule.jsx # Rahmenverträge
+│       ├── FindCustomers.jsx      # Kundensuche via Overpass API
 │       ├── EmailMarketing.jsx     # E-Mail-Kampagnen
+│       ├── Settings.jsx           # Einstellungen
+│       ├── Login.jsx              # Login (Web + Electron)
 │       ├── AdminPanel.jsx         # Benutzerverwaltung
-│       ├── Login.jsx              # Login + Touch ID
-│       └── WindowsTitleBar.jsx    # Windows Titelleiste
-├── assets/
-│   └── icon.icns
-├── config.json          # DB-Zugangsdaten (nicht in Git, wird ins DMG eingebettet)
-├── .env.example         # Vorlage für Entwickler
+│       └── ...
+├── Dockerfile           # API Container (Node 20 + Chromium)
+├── Dockerfile.frontend  # Frontend Container (Vite build → Nginx)
+├── nginx.conf           # SPA-Routing
+├── vite.web.config.js   # Web-Build Konfiguration
 └── package.json
 ```
 
@@ -68,55 +99,59 @@ aku-crm/
 ## Features
 
 ### Kunden & CRM
-- Kontaktverwaltung mit Status-Tracking (10 Stufen: Nicht kontaktiert → Aktiver Kunde)
-- Einrichtungstyp-Tags (Krankenhaus, Pflegeheim, Ambulante Pflege, Reha Klinik, Betreutes Wohnen)
-- Pipeline-Ansicht (Kanban nach Status)
-- Follow-up Erinnerungen mit Überfälligkeits-Anzeige
-- Anrufsession: sequentielles Durcharbeiten von Kontaktlisten
-- Aktivitätslog pro Kontakt
-- CSV-Import / Export
-- Dokumentenanhänge pro Kontakt
-- Kundensuche via OpenStreetMap / Overpass API (mit 3 Fallback-Servern)
+- Kontaktverwaltung mit Status-Tracking (10 Stufen)
+- Einrichtungstyp-Tags (Krankenhaus, Pflegeheim, Ambulante Pflege, Reha, Betreutes Wohnen, Logistik)
+- Pipeline-Ansicht (Kanban)
+- Follow-up Erinnerungen
+- Anrufsession: sequentielles Durcharbeiten
+- Kundensuche via OpenStreetMap/Overpass API (bereits hinzugefügte werden markiert)
 
 ### E-Mail Marketing
-- Kampagnen mit Rich-Text-Editor (HTML)
-- SMTP-Versand direkt aus der App (via Nodemailer)
-- Provider-Vorlagen: Outlook, Gmail, GMX, Web.de, Strato, IONOS, eigener SMTP
-- Kampagnen-Ergebnisse werden gespeichert
+- Kampagnen mit Rich-Text-Editor
+- SMTP-Versand (Strato, Outlook, Gmail, GMX, Web.de, IONOS)
 
 ### Belege
-- **Angebote** – Erstellen, bearbeiten, PDF-Export mit Firmenprofil
-  - Einrichtungstyp-Auswahl passt Texte und Stundensätze automatisch an
-  - Empfänger aus CRM-Kontakten auswählen (Auto-Fill)
-  - Live-Vorschau (A4-skaliert)
-  - PDF-Export via Electron `printToPDF`
-- **Rahmenverträge** – Individuelle Verträge pro Kunde
-  - Vertragsspezifische Felder (Laufzeit, Kündigungsfrist, Konditionen)
-  - Automatische Nummernvergabe (RV-YYYY-NNN)
-- Status-Tracking: Entwurf, Verschickt, Angenommen, Abgelehnt
-- Finanzübersicht: Offene Angebote, Angenommene Summen
+- **Angebote** – PDF-Export mit Firmenprofil, Einrichtungstyp-spezifische Texte
+- **Rahmenverträge** – Individuelle Verträge (RV-YYYY-NNN)
+- Status-Tracking: Entwurf → Verschickt → Angenommen/Abgelehnt
 
 ### Einstellungen
-- **Mein Profil** – Name, E-Mail, Standort, Profilbild
-- **Firmenprofil** – Logo, Firmenname, Adresse, Kontaktdaten (wird automatisch in Angebots-PDFs übernommen)
-- **E-Mail Konto** – SMTP-Konfiguration (Strato, Outlook, Gmail, GMX, Web.de, IONOS, eigener Server)
-- **Anrufe** – Anrufeinstellungen
-- **Darstellung** – Hell/Dunkel-Modus
-- **Sprache** – Deutsch, English, Türkçe
-- **Backup & Daten** – Datenexport
+- Profil, Firmenprofil, E-Mail-Konto, Darstellung, Sprache, Backup
 
-### Admin
-- Benutzerverwaltung (Passwort zurücksetzen, löschen)
-- Touch ID Login (macOS)
+---
 
-### Navigation
-- Globaler Zurück-Button mit View-History (navigiert immer zur vorherigen Seite)
-- Sidebar: Dashboard, Kunden & CRM, Belege, Aktionen (Kunden finden, Anrufsession, E-Mail Marketing)
+## Deployment
 
-### Automatische Updates
-- App prüft beim Start ob eine neue Version verfügbar ist
-- Download läuft im Hintergrund
-- Banner zeigt Update-Status, Neustart installiert die neue Version
+### Docker (Coolify)
+
+**API:**
+```bash
+# Dockerfile → Node 20 + Chromium (Puppeteer PDF)
+# Env-Variablen: DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, JWT_SECRET
+# Custom Docker Options: --network=coolify
+```
+
+**Frontend:**
+```bash
+# Dockerfile.frontend → Vite build + Nginx
+# Build-Arg: VITE_API_URL=https://api.zeitblick-personal.de
+```
+
+### Entwicklung
+
+```bash
+# Electron (Desktop)
+npm run dev
+
+# Web (lokal)
+npm run dev:web
+
+# API only
+npm run start:api
+
+# Produktion bauen
+npm run dist
+```
 
 ---
 
@@ -124,46 +159,11 @@ aku-crm/
 
 | Tabelle | Inhalt |
 |---|---|
-| `users` | CRM-Nutzer, Auth, Einstellungen, E-Mail-Konfiguration |
+| `users` | Nutzer, Auth, E-Mail-Config, web_settings (JSONB) |
 | `contacts` | Akquise-Kontakte mit Status, Follow-up & Einrichtungstyp |
 | `call_history` | Anrufprotokolle |
 | `email_campaigns` | E-Mail-Kampagnen & Ergebnisse |
-| `offers` | Angebote & Rahmenverträge (doc_type: angebot/rahmenvertrag) |
-| `documents` | Datei-Anhänge pro Kontakt |
-
----
-
-## Entwicklung
-
-```bash
-# Abhängigkeiten installieren
-npm install
-
-# .env anlegen (nach .env.example)
-cp .env.example .env
-
-# Dev-Modus (Vite + Electron gleichzeitig, Hot Reload)
-npm run dev
-
-# Produktion bauen + DMG erstellen
-npm run dist
-```
-
-### Neue Version veröffentlichen
-1. Version in `package.json` erhöhen (z.B. `1.0.1`)
-2. `npm run dist` ausführen
-3. Apps ad-hoc signieren:
-   ```bash
-   codesign --deep --force --sign - "dist/mac-arm64/Aku CRM.app"
-   codesign --deep --force --sign - "dist/mac/Aku CRM.app"
-   ```
-4. DMGs neu erstellen:
-   ```bash
-   hdiutil create -volname "Aku CRM" -srcfolder "dist/mac-arm64/Aku CRM.app" -ov -format UDZO "dist/Aku CRM-1.0.1-arm64.dmg"
-   hdiutil create -volname "Aku CRM" -srcfolder "dist/mac/Aku CRM.app" -ov -format UDZO "dist/Aku CRM-1.0.1.dmg"
-   ```
-5. GitHub Release erstellen und DMGs + `latest-mac.yml` + `.blockmap` hochladen
-6. Alle Nutzer bekommen das Update automatisch beim nächsten App-Start
+| `offers` | Angebote & Rahmenverträge (doc_type) |
 
 ---
 
