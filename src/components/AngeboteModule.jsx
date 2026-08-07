@@ -90,9 +90,9 @@ const EINRICHTUNG_TYPEN = {
     body2: 'Zeitblick Personalservice ist ein in Hannover ansässiger Personaldienstleister, spezialisiert auf die flexible Überlassung von Fach- und Hilfskräften für Logistik, Lager und Versand. Unsere Mitarbeiterinnen und Mitarbeiter sind erfahren im Umgang mit Warenwirtschaftssystemen, Kommissionierung und Versandabwicklung – und stehen Ihnen auch kurzfristig zur Verfügung, um saisonale Spitzen oder Personalengpässe zuverlässig abzufangen.',
     highlightText: 'Flexibel skalieren ohne Personalrisiko – ob Saisonspitze, Großauftrag oder kurzfristiger Ausfall. Sie erhalten einsatzbereites, erfahrenes Lagerpersonal genau dann, wenn Sie es brauchen.',
     pricing: [
-      { qualifikation: 'Lagerlogistiker/in', badge: 'Fachkraft', badgeColor: 'green', einsatz: 'Wareneingang, Kommissionierung, Versand', preis: '28,50' },
-      { qualifikation: 'Staplerfahrer/in', badge: 'Staplerschein', badgeColor: 'blue', einsatz: 'Stapler, Ein-/Auslagerung', preis: '30,00' },
-      { qualifikation: 'Lagerhelfer/in', badge: 'Hilfskraft', badgeColor: 'gray', einsatz: 'Verpackung, Sortierung, Versand', preis: '22,50' },
+      { qualifikation: 'Lagerhelfer/in', badge: 'Hilfskraft', badgeColor: 'gray', einsatz: 'Sortierung, Kommissionierung, Verpackung', preis: '25,50' },
+      { qualifikation: 'Kommissionierer/in', badge: 'Erfahren', badgeColor: 'blue', einsatz: 'Wareneingang, Kommissionierung, Versand', preis: '27,00' },
+      { qualifikation: 'Staplerfahrer/in', badge: 'Staplerschein', badgeColor: 'green', einsatz: 'Stapler, Ein-/Auslagerung, Warenumschlag', preis: '30,00' },
     ],
   },
 }
