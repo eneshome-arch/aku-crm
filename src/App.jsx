@@ -32,6 +32,7 @@ import WindowsTitleBar from './components/WindowsTitleBar'
 import AngeboteModule from './components/AngeboteModule'
 import BelegeModule from './components/BelegeModule'
 import KundenCRM from './components/KundenCRM'
+import QuickNote from './components/QuickNote'
 
 const platform = api.platform || 'darwin'
 
@@ -414,6 +415,7 @@ export default function App() {
           onOpenSettings={() => { setShowEmailMarketing(false); navigateTo('settings') }}
         />
       )}
+      <QuickNote userId={currentUser?.id} />
       </div>
     </div>
   )

@@ -79,6 +79,11 @@ export const webAPI = {
   getSettings: () => get('/api/settings'),
   setSetting: (key, value) => post(`/api/settings/${key}`, { value }),
 
+  // Notes
+  notesList: (userId) => get(`/api/notes?userId=${userId}`),
+  notesSave: (userId, text) => post('/api/notes', { userId, text }),
+  notesDelete: (noteId, userId) => post(`/api/notes/${noteId}/delete`, { userId }),
+
   // Fetch / Scrape
   extract: (url) => post('/api/fetch/extract', { url }),
   overpass: (query) => post('/api/fetch/overpass', { query }),

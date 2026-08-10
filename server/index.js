@@ -39,6 +39,7 @@ app.use('/api/email', requireAuth, require('./routes/email'))
 app.use('/api/admin', requireAuth, require('./routes/admin'))
 app.use('/api/settings', requireAuth, require('./routes/settings'))
 app.use('/api/fetch', requireAuth, require('./routes/fetch'))
+app.use('/api/notes', requireAuth, require('./routes/notes'))
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }))

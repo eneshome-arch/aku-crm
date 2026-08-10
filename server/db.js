@@ -157,6 +157,15 @@ async function initDb() {
   await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS doc_type VARCHAR(30) DEFAULT 'angebot'`)
   await p.query(`ALTER TABLE offers ADD COLUMN IF NOT EXISTS due_date DATE`)
 
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS notes (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      text TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `)
+
   // Industry migration
   await p.query(`
     UPDATE contacts SET industry = CASE
