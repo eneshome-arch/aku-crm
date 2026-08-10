@@ -154,14 +154,14 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-gray-50/90 backdrop-blur-sm border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 pt-2">
-          <h2 className="text-2xl font-bold text-gray-900">{contact.company_name}</h2>
-          <span className={`text-xs px-3 py-1 rounded-full font-semibold ${STATUS_COLORS[contact.status] || STATUS_COLORS[1]}`}>
+      <div className="sticky top-0 z-10 bg-gray-50/90 backdrop-blur-sm border-b border-gray-200 px-4 md:px-8 py-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 pt-2 min-w-0">
+          <h2 className="text-lg md:text-2xl font-bold text-gray-900 truncate">{contact.company_name}</h2>
+          <span className={`text-xs px-2 md:px-3 py-1 rounded-full font-semibold flex-shrink-0 ${STATUS_COLORS[contact.status] || STATUS_COLORS[1]}`}>
             {STATUS_LABELS[contact.status]}
           </span>
         </div>
-        <div className="flex items-center gap-2 pt-2">
+        <div className="flex items-center gap-2 pt-2 flex-shrink-0">
           {!editMode ? (
             <>
               <button
@@ -249,7 +249,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
               </span>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <div className="mb-3">
               <label className="block text-xs font-medium text-gray-400 mb-0.5">Nächstes Followup</label>
               {editMode ? (
@@ -271,7 +271,7 @@ export default function ContactProfile({ contact, onUpdated, onDeleted }) {
 
         {/* Rahmenvertrag */}
         <Section title="Rahmenvertrag">
-          <div className="grid grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <Field label="Umsatzpotenzial (€)" value={form.revenue_potential} type="number" editMode={editMode} onChange={set('revenue_potential')} />
           </div>
           <Field label="Notizen zur Chance" value={form.contract_notes} editMode={editMode} onChange={set('contract_notes')} rows={3} />

@@ -94,9 +94,23 @@ export default function CallList({ contacts, onStart, onClose }) {
           </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        {/* Mobile: Start-Button oben anzeigen wenn Kontakte ausgewählt */}
+        {selected.length > 0 && (
+          <div className="md:hidden px-4 py-3 border-b border-gray-100 flex-shrink-0">
+            <button
+              onClick={() => onStart(selected)}
+              className="w-full py-3 text-sm font-bold bg-green-500 hover:bg-green-600 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <Phone size={16} />
+              Anrufsession starten ({selected.length})
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* Linke Seite: Kontakte auswählen */}
-          <div className="flex-1 flex flex-col border-r border-gray-100">
+          <div className="flex-1 flex flex-col md:border-r border-gray-100">
             <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">
               <div className="flex gap-2">
                 <button
@@ -166,7 +180,7 @@ export default function CallList({ contacts, onStart, onClose }) {
           </div>
 
           {/* Rechte Seite: Reihenfolge */}
-          <div className="w-72 flex flex-col">
+          <div className="hidden md:flex w-72 flex-col">
             <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Anrufreihenfolge ({selected.length})

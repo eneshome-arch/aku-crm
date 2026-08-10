@@ -56,10 +56,10 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
   })
 
   return (
-    <aside className={`w-72 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm flex-shrink-0
+    <aside className={`w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0
       fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out
       ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-      lg:relative lg:translate-x-0 lg:z-auto`}>
+      lg:relative lg:translate-x-0 lg:z-auto lg:h-full`}>
       {/* Title bar area — nur auf macOS für Traffic Lights */}
       {platform === 'darwin' ? (
         <div className="drag-region h-12 flex items-center px-4 pt-2 flex-shrink-0">
@@ -78,7 +78,7 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
       )}
 
       {/* App title */}
-      <div className="px-4 pb-3 flex-shrink-0 flex items-center justify-between">
+      <div className="px-4 pb-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-gray-900 tracking-tight">CRM Akquise</h1>
         {platform !== 'darwin' && (
           <button
@@ -92,7 +92,7 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
       </div>
 
       {/* Search */}
-      <div className="px-3 mb-2 flex-shrink-0">
+      <div className="px-3 mb-2">
         <div className="relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -107,7 +107,7 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
       </div>
 
       {/* Navigation */}
-      <div className="px-3 mb-1 flex-shrink-0 space-y-1">
+      <div className="px-3 mb-1 space-y-1">
         <button
           onClick={onShowDashboard}
           className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
@@ -144,7 +144,7 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
       </div>
 
       {/* Aktionen */}
-      <div className="px-3 mb-2 flex-shrink-0">
+      <div className="px-3 mb-2">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-2">Aktionen</p>
         <div className="space-y-1">
           <button
@@ -171,11 +171,8 @@ export default function Sidebar({ contacts, selectedContact, onSelectContact, on
         </div>
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Bottom nav */}
-      <div className="px-3 py-3 border-t border-gray-100 flex-shrink-0 space-y-1">
+      {/* Einstellungen & Admin — direkt unter Aktionen, nicht am unteren Rand */}
+      <div className="px-3 pt-2 border-t border-gray-100 space-y-1">
         {isAdmin && (
           <button
             onClick={onOpenAdmin}

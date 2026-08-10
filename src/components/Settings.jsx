@@ -156,7 +156,7 @@ function ProfileSection({ currentUser, onProfileUpdated }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
           <User size={20} className="text-gray-600" />
@@ -292,10 +292,10 @@ function CompanySection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <Building2 size={20} className="text-blue-600" />
           </div>
           <div>
@@ -358,8 +358,8 @@ function CompanySection() {
         {/* KONTAKTINFORMATIONEN */}
         <div>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Kontaktinformationen</h3>
-          <div className="grid grid-cols-4 gap-3 mb-5">
-            <div className="col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-5">
+            <div className="sm:col-span-3">
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
               <input type="text" value={data.adresse} onChange={set('adresse')} placeholder="Musterstraße 1" className={inputClass} />
             </div>
@@ -371,7 +371,7 @@ function CompanySection() {
           <Field label="Stadt">
             <input type="text" value={data.stadt} onChange={set('stadt')} placeholder="Hannover" className={inputClass} />
           </Field>
-          <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Telefon</label>
               <input type="text" value={data.telefon} onChange={set('telefon')} placeholder="+49 511 123456" className={inputClass} />
@@ -516,7 +516,7 @@ function CallsSection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
           <Phone size={20} className="text-green-600" />
@@ -686,7 +686,7 @@ function EmailSection({ currentUser, onProfileUpdated }) {
   const selectedProvider = PROVIDERS.find(p => p.value === provider)
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
           <Mail size={20} className="text-blue-600" />
@@ -711,7 +711,7 @@ function EmailSection({ currentUser, onProfileUpdated }) {
         </Field>
 
         {provider === 'custom' && (
-          <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">SMTP Host</label>
               <input type="text" value={config.host} onChange={set('host')} placeholder="mail.example.com" className={inputClass} />
@@ -781,7 +781,7 @@ function EmailSection({ currentUser, onProfileUpdated }) {
 
 function AppearanceSection({ darkMode, onSetDarkMode }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
           <Sun size={20} className="text-yellow-500" />
@@ -865,7 +865,7 @@ function LanguageSection({ language, onSetLanguage }) {
   ]
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
           <Globe size={20} className="text-green-600" />
@@ -930,7 +930,7 @@ function NotificationsSection() {
   ]
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
           <Bell size={20} className="text-orange-600" />
@@ -1068,7 +1068,7 @@ function BackupSection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
           <HardDrive size={20} className="text-purple-600" />

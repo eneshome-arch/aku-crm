@@ -218,7 +218,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 flex flex-col" style={{ height: '88vh' }}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 flex flex-col h-[88vh] max-h-[88dvh]">
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
@@ -242,7 +242,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100 flex-shrink-0">
+        <div className="flex border-b border-gray-100 flex-shrink-0 overflow-x-auto">
           {[
             { id: 'contacts', label: 'Empfänger', icon: Users },
             { id: 'templates', label: 'Vorlagen', icon: FolderOpen },
@@ -253,11 +253,11 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 tab === id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Icon size={14} /> {label}
+              <Icon size={14} /> <span className="hidden sm:inline">{label}</span>
               {id === 'contacts' && selected.length > 0 && (
                 <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">{selected.length}</span>
               )}
@@ -366,7 +366,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {savedTemplates.map(t => (
                       <div key={t.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         {/* Minivorschau */}
@@ -416,7 +416,7 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
                   onChange={e => setSubject(e.target.value)}
                   className="flex-1 px-3 py-2 bg-gray-100 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 />
-                <div className="flex gap-1 flex-shrink-0">
+                <div className="hidden md:flex gap-1 flex-shrink-0">
                   {VARIABLES.map(v => (
                     <span key={v} className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-lg font-mono">{v}</span>
                   ))}
@@ -574,9 +574,9 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
 
           {/* Kampagnen-Verlauf */}
           {tab === 'history' && (
-            <div className="h-full flex">
+            <div className="h-full flex flex-col md:flex-row">
               {/* Kampagnenliste */}
-              <div className={`flex flex-col border-r border-gray-100 ${campaignDetail ? 'w-72 flex-shrink-0' : 'flex-1'}`}>
+              <div className={`flex flex-col md:border-r border-gray-100 ${campaignDetail ? 'hidden md:flex md:w-72 flex-shrink-0' : 'flex-1'}`}>
                 <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
                   <p className="text-sm font-semibold text-gray-700">Gesendete Kampagnen</p>
                   <button onClick={loadCampaigns} className="text-gray-400 hover:text-gray-600 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors" title="Aktualisieren">
@@ -622,9 +622,14 @@ export default function EmailMarketing({ contacts, currentUser, onClose, onOpenS
               {campaignDetail && (
                 <div className="flex-1 flex flex-col overflow-hidden">
                   <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{campaignDetail.name}</p>
-                      <p className="text-xs text-gray-400">{new Date(campaignDetail.sent_at).toLocaleString('de-DE')}</p>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setCampaignDetail(null)} className="md:hidden text-gray-400 hover:text-gray-600">
+                        <X size={16} />
+                      </button>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{campaignDetail.name}</p>
+                        <p className="text-xs text-gray-400">{new Date(campaignDetail.sent_at).toLocaleString('de-DE')}</p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button

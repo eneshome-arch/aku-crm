@@ -63,7 +63,9 @@ export default function CallSession({ contacts, onClose, onSessionEnd }) {
 
   const startCall = useCallback(() => {
     if (phone) {
-      window.open(`tel:${phone.replace(/\s/g, '')}`)
+      const a = document.createElement('a')
+      a.href = `tel:${phone.replace(/\s/g, '')}`
+      a.click()
     }
     setCalling(true)
     timer.start()

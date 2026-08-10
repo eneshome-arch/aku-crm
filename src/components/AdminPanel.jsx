@@ -159,7 +159,7 @@ export default function AdminPanel() {
   })
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-8 pt-10">
+    <div className="h-full overflow-y-auto bg-gray-50 p-4 md:p-8 pt-6 md:pt-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -179,7 +179,7 @@ export default function AdminPanel() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-2xl shadow-sm p-5 flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
             <Users size={18} className="text-blue-600" />
@@ -275,17 +275,17 @@ export default function AdminPanel() {
                     <>
                       <button
                         onClick={() => setResetUser(user)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+                        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
                       >
                         <KeyRound size={13} />
-                        Passwort
+                        <span className="hidden sm:inline">Passwort</span>
                       </button>
                       <button
                         onClick={() => setDeleteUser(user)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
                       >
                         <Trash2 size={13} />
-                        Löschen
+                        <span className="hidden sm:inline">Löschen</span>
                       </button>
                     </>
                   )}

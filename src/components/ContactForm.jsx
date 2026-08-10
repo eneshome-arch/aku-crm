@@ -62,7 +62,7 @@ function Input({ value, onChange, type = 'text', placeholder }) {
 
 function SectionHeader({ title }) {
   return (
-    <div className="col-span-2 mt-2 mb-1">
+    <div className="col-span-1 sm:col-span-2 mt-2 mb-1">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-2">{title}</p>
     </div>
   )
@@ -288,7 +288,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
           {error && (
             <div className="mb-4 px-4 py-3 bg-red-50 text-red-600 text-sm rounded-xl">{error}</div>
           )}
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
             <SectionHeader title="Firmendaten" />
             <FormField label="Firmenname" required>
               <Input value={form.company_name} onChange={set('company_name')} placeholder="Muster GmbH" />
@@ -301,7 +301,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
             </FormField>
 
             {/* Adresse mit Autocomplete - volle Breite */}
-            <div className="col-span-2 mb-3">
+            <div className="col-span-1 sm:col-span-2 mb-3">
               <label className="block text-xs font-medium text-gray-500 mb-1">Adresse</label>
               <AddressAutocomplete
                 value={form.address}
@@ -358,7 +358,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
             <FormField label="Nächstes Followup">
               <Input value={form.next_followup} onChange={set('next_followup')} type="datetime-local" />
             </FormField>
-            <div className="col-span-2 mb-3">
+            <div className="col-span-1 sm:col-span-2 mb-3">
               <label className="block text-xs font-medium text-gray-500 mb-1">Erinnerungsnotiz</label>
               <textarea
                 rows={2}
@@ -372,7 +372,7 @@ export default function ContactForm({ userId, onSaved, onClose }) {
             <FormField label="Umsatzpotenzial (€)">
               <Input value={form.revenue_potential} onChange={set('revenue_potential')} type="number" placeholder="50000" />
             </FormField>
-            <div className="col-span-2 mb-3">
+            <div className="col-span-1 sm:col-span-2 mb-3">
               <label className="block text-xs font-medium text-gray-500 mb-1">Notizen zur Chance</label>
               <textarea
                 rows={3}

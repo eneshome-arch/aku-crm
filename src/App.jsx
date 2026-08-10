@@ -279,7 +279,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {platform === 'win32' && <WindowsTitleBar />}
       {updateStatus === 'ready' && (
         <div className="bg-green-600 text-white text-sm px-4 py-2 flex items-center justify-between z-50">
