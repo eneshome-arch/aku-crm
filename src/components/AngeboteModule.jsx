@@ -1,6 +1,6 @@
 import { api } from '../api'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Plus, FileText, Trash2, Download, Save, Eye, Edit3, ChevronLeft, X, Search, UserCheck, RefreshCw } from 'lucide-react'
+import { Plus, FileText, Trash2, Download, Save, Eye, Edit3, ChevronLeft, X, Search, UserCheck, RefreshCw, Scissors } from 'lucide-react'
 
 const STATUS_LABELS = {
   entwurf: { label: 'Entwurf', color: 'bg-gray-100 text-gray-600' },
@@ -125,6 +125,7 @@ function newOffer(typ = 'pflegeheim') {
     ],
     status: 'entwurf',
     notes: '',
+    pageBreakAfter: 'pricing',
   }
 }
 
@@ -175,7 +176,7 @@ function generateHTML(offer, company = {}) {
     offer.recipientAddress,
   ].filter(Boolean).join('<br>')
 
-  return `<!DOCTYPE html>
+  const headerHTML = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -193,8 +194,8 @@ function generateHTML(offer, company = {}) {
     .header-contact p { font-size:8.5pt; color:rgba(255,255,255,0.6); line-height:1.7; }
     .header-contact strong { color:rgba(255,255,255,0.9); font-weight:500; }
     .accent-bar { height:3px; background:linear-gradient(to right,${c.accentColor},#06b6d4); }
-    .body { padding:20px 40px 24px; flex:1; }
-    .meta-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #e2e8f0; }
+    .body { padding:16px 40px 18px; flex:1; }
+    .meta-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #e2e8f0; }
     .meta-label { font-size:7.5pt; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; margin-bottom:5px; }
     .meta-company { font-size:10pt; color:#1e293b; }
     .offer-number-val { font-size:11pt; font-weight:700; color:#0f172a; }
@@ -203,9 +204,9 @@ function generateHTML(offer, company = {}) {
     .subject-title { font-size:15pt; font-weight:700; color:#0f172a; line-height:1.2; letter-spacing:-0.3px; margin-bottom:12px; }
     .salutation { font-size:10pt; margin-bottom:8px; color:#1e293b; }
     .letter-text p { margin-bottom:7px; color:#334155; font-size:9.5pt; line-height:1.65; }
-    .highlight-box { background:#f0f9ff; border-left:3px solid #3b82f6; border-radius:0 8px 8px 0; padding:10px 16px; margin:10px 0; }
+    .highlight-box { background:#f0f9ff; border-left:3px solid #3b82f6; border-radius:0 8px 8px 0; padding:8px 16px; margin:8px 0; }
     .highlight-box p { color:#1e40af; font-size:9pt; margin:0; }
-    .section { margin:14px 0; }
+    .section { margin:10px 0; }
     .section-title { font-size:8pt; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:${c.accentColor}; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
     .section-title::after { content:''; flex:1; height:1px; background:#e2e8f0; }
     .pricing-table { width:100%; border-collapse:collapse; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
@@ -227,9 +228,9 @@ function generateHTML(offer, company = {}) {
     .v-label { font-size:8pt; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.08em; }
     .v-date { font-size:11pt; font-weight:700; color:#fff; margin-top:2px; }
     .v-note { font-size:8pt; color:rgba(255,255,255,0.5); text-align:right; max-width:180px; line-height:1.4; }
-    .closing { margin-top:18px; padding-top:14px; border-top:1px solid #e2e8f0; }
+    .closing { margin-top:14px; padding-top:10px; border-top:1px solid #e2e8f0; }
     .closing p { font-size:9.5pt; color:#334155; line-height:1.65; margin-bottom:7px; }
-    .signature { margin-top:16px; }
+    .signature { margin-top:12px; }
     .sig-greeting { font-size:10pt; color:#334155; margin-bottom:12px; }
     .sig-name { font-size:11pt; font-weight:700; color:#0f172a; }
     .sig-role { font-size:8.5pt; color:#64748b; margin-top:3px; }
@@ -288,7 +289,9 @@ function generateHTML(offer, company = {}) {
     <div class="highlight-box">
       <p><strong>Ihr Vorteil:</strong> ${offer.highlightText}</p>
     </div>
+`
 
+  const pricingSectionHTML = `
     <div class="section">
       <div class="section-title">Stundenverrechnungssätze (netto, zzgl. MwSt.)</div>
       <table class="pricing-table">
@@ -300,8 +303,9 @@ function generateHTML(offer, company = {}) {
         <tbody>${pricingRows}</tbody>
       </table>
       <div class="price-note">Alle Preise in Euro netto · zzgl. der zum Zeitpunkt der Rechnungsstellung gültigen gesetzlichen MwSt.</div>
-    </div>
+    </div>`
 
+  const surchargesHTML = `
     <div class="section">
       <div class="section-title">Zuschläge</div>
       <div class="surcharge-grid">
@@ -309,15 +313,69 @@ function generateHTML(offer, company = {}) {
         <div class="surcharge-item"><div class="surcharge-label">${s.label}<small>${s.detail}</small></div><div class="surcharge-value">+ ${s.value} %</div></div>
         `).join('')}
       </div>
+    </div>`
+
+  const termsHTML = `
+    <div class="section">
+      <div class="section-title">Abrechnungs- &amp; Zahlungsbedingungen</div>
+      <div class="terms-grid">
+        <div class="term-item"><div class="term-label">Abrechnung</div><div class="term-value">Wöchentlich auf Basis gegengezeichneter Arbeitsstundennachweise</div></div>
+        <div class="term-item"><div class="term-label">Zahlungsziel</div><div class="term-value">14 Tage nach Rechnungseingang, netto ohne Abzug</div></div>
+        <div class="term-item"><div class="term-label">Zahlungsart</div><div class="term-value">Bargeldlose Überweisung</div></div>
+        <div class="term-item"><div class="term-label">Grundlage</div><div class="term-value">AGB Zeitblick Personalservice · Arbeitnehmerüberlassungsgesetz (AÜG)</div></div>
+      </div>
+    </div>`
+
+  const validityHTML = `
+    <div class="section">
+      <div class="section-title">Angebotsgültigkeit</div>
+      <div class="validity-box">
+        <div><div class="v-label">Gültig bis</div><div class="v-date">${formatDateDE(offer.validUntil)}</div></div>
+        <div class="v-note">Nach Ablauf erstellen wir Ihnen gerne ein aktualisiertes Angebot.</div>
+      </div>
+    </div>`
+
+  const servicesHTML = `
+    <div class="section">
+      <div class="section-title">Unsere Leistungen im Überblick</div>
+      <div class="terms-grid">
+        <div class="term-item"><div class="term-label">Personalauswahl</div><div class="term-value">Sorgfältige Vorauswahl & Qualifikationsprüfung aller eingesetzten Mitarbeiter</div></div>
+        <div class="term-item"><div class="term-label">Flexibilität</div><div class="term-value">Kurzfristiger Einsatz auch bei spontanem Bedarf – deutschlandweit verfügbar</div></div>
+        <div class="term-item"><div class="term-label">Compliance</div><div class="term-value">Vollständig AÜG-konform, alle gesetzlichen Vorgaben werden eingehalten</div></div>
+        <div class="term-item"><div class="term-label">Betreuung</div><div class="term-value">Persönlicher Ansprechpartner für Sie & unsere Mitarbeiter vor Ort</div></div>
+      </div>
+    </div>`
+
+  const closingHTML = `
+    <div class="closing">
+      <p>Wir würden uns freuen, Sie als neuen Partner zu gewinnen und Ihre Einrichtung verlässlich zu unterstützen. Gerne besprechen wir in einem persönlichen Gespräch Ihre konkreten Anforderungen und stimmen den Einsatz individuell auf Ihren Bedarf ab.</p>
+      <p style="font-weight:600;color:#1e293b">Melden Sie sich einfach bei mir – ich stehe Ihnen für Rückfragen jederzeit zur Verfügung.</p>
     </div>
+    <div class="signature">
+      <div class="sig-greeting">Mit freundlichen Grüßen</div>
+      <div class="sig-name">${c.contactPerson || c.name}</div>
+      <div class="sig-role">Geschäftsführung</div>
+      <div class="sig-company">${c.name}</div>
+    </div>`
 
-  </div>
+  // Sections in order — pageBreakAfter determines which is the last on page 1
+  const sectionOrder = ['pricing', 'surcharges', 'terms', 'validity', 'services', 'closing']
+  const sectionHTML = { pricing: pricingSectionHTML, surcharges: surchargesHTML, terms: termsHTML, validity: validityHTML, services: servicesHTML, closing: closingHTML }
+  const breakIdx = sectionOrder.indexOf(offer.pageBreakAfter || 'pricing')
+  const page1Sections = sectionOrder.slice(0, breakIdx + 1).map(k => sectionHTML[k]).join('\n')
+  const page2Sections = sectionOrder.slice(breakIdx + 1).map(k => sectionHTML[k]).join('\n')
 
+  const footerHTML = `
   <div class="footer">
     <div><p class="footer-brand">${c.name}</p><p>${c.address}</p></div>
     <div style="text-align:center"><p>Tel. ${c.phone}</p><p>${c.email}</p></div>
     <div style="text-align:right"><p>${c.website}</p>${c.ustId ? `<p>USt-IdNr. ${c.ustId}</p>` : ''}</div>
+  </div>`
+
+  return `${headerHTML}
+    ${page1Sections}
   </div>
+  ${footerHTML}
 </div>
 
 <!-- Seite 2 -->
@@ -329,51 +387,9 @@ function generateHTML(offer, company = {}) {
   <div class="page-2-accent"></div>
 
   <div class="body">
-    <div class="section">
-      <div class="section-title">Abrechnungs- &amp; Zahlungsbedingungen</div>
-      <div class="terms-grid">
-        <div class="term-item"><div class="term-label">Abrechnung</div><div class="term-value">Wöchentlich auf Basis gegengezeichneter Arbeitsstundennachweise</div></div>
-        <div class="term-item"><div class="term-label">Zahlungsziel</div><div class="term-value">14 Tage nach Rechnungseingang, netto ohne Abzug</div></div>
-        <div class="term-item"><div class="term-label">Zahlungsart</div><div class="term-value">Bargeldlose Überweisung</div></div>
-        <div class="term-item"><div class="term-label">Grundlage</div><div class="term-value">AGB Zeitblick Personalservice · Arbeitnehmerüberlassungsgesetz (AÜG)</div></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Angebotsgültigkeit</div>
-      <div class="validity-box">
-        <div><div class="v-label">Gültig bis</div><div class="v-date">${formatDateDE(offer.validUntil)}</div></div>
-        <div class="v-note">Nach Ablauf erstellen wir Ihnen gerne ein aktualisiertes Angebot.</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Unsere Leistungen im Überblick</div>
-      <div class="terms-grid">
-        <div class="term-item"><div class="term-label">Personalauswahl</div><div class="term-value">Sorgfältige Vorauswahl & Qualifikationsprüfung aller eingesetzten Mitarbeiter</div></div>
-        <div class="term-item"><div class="term-label">Flexibilität</div><div class="term-value">Kurzfristiger Einsatz auch bei spontanem Bedarf – deutschlandweit verfügbar</div></div>
-        <div class="term-item"><div class="term-label">Compliance</div><div class="term-value">Vollständig AÜG-konform, alle gesetzlichen Vorgaben werden eingehalten</div></div>
-        <div class="term-item"><div class="term-label">Betreuung</div><div class="term-value">Persönlicher Ansprechpartner für Sie & unsere Mitarbeiter vor Ort</div></div>
-      </div>
-    </div>
-
-    <div class="closing">
-      <p>Wir würden uns freuen, Sie als neuen Partner zu gewinnen und Ihre Einrichtung verlässlich zu unterstützen. Gerne besprechen wir in einem persönlichen Gespräch Ihre konkreten Anforderungen und stimmen den Einsatz individuell auf Ihren Bedarf ab.</p>
-      <p style="font-weight:600;color:#1e293b">Melden Sie sich einfach bei mir – ich stehe Ihnen für Rückfragen jederzeit zur Verfügung.</p>
-    </div>
-    <div class="signature">
-      <div class="sig-greeting">Mit freundlichen Grüßen</div>
-      <div class="sig-name">${c.contactPerson || c.name}</div>
-      <div class="sig-role">Geschäftsführung</div>
-      <div class="sig-company">${c.name}</div>
-    </div>
+    ${page2Sections}
   </div>
-
-  <div class="footer">
-    <div><p class="footer-brand">${c.name}</p><p>${c.address}</p></div>
-    <div style="text-align:center"><p>Tel. ${c.phone}</p><p>${c.email}</p></div>
-    <div style="text-align:right"><p>${c.website}</p>${c.ustId ? `<p>USt-IdNr. ${c.ustId}</p>` : ''}</div>
-  </div>
+  ${footerHTML}
 </div>
 </body>
 </html>`
@@ -465,6 +481,7 @@ export default function AngeboteModule({ currentUser }) {
     const rawItems = o.items || {}
     const items = Array.isArray(rawItems) ? rawItems : (rawItems.pricing || [])
     const savedSurcharges = Array.isArray(rawItems) ? null : (rawItems.surcharges || null)
+    const savedPageBreak = Array.isArray(rawItems) ? null : (rawItems.pageBreakAfter || null)
     const defaultSurcharges = [
       { label: 'Überstunden', detail: 'ab der 40,01. Wochenstunde', value: '25' },
       { label: 'Nachtzuschlag', detail: '23:00 – 06:00 Uhr', value: '35' },
@@ -510,6 +527,7 @@ export default function AngeboteModule({ currentUser }) {
       surcharges: savedSurcharges || defaultSurcharges,
       status: o.status || 'entwurf',
       notes: o.notes || '',
+      pageBreakAfter: savedPageBreak || 'pricing',
     })
     setTab('editor')
   }
@@ -532,7 +550,7 @@ export default function AngeboteModule({ currentUser }) {
         docType: 'angebot',
         offerNumber: selected.offerNumber,
         title: selected.recipientCompany || selected.recipientName || 'Angebot',
-        items: { pricing: selected.pricing, surcharges: selected.surcharges },
+        items: { pricing: selected.pricing, surcharges: selected.surcharges, pageBreakAfter: selected.pageBreakAfter },
         notes: selected.notes,
         taxRate: 19,
         subtotal: 0, taxAmount: 0, total: 0,
@@ -822,6 +840,26 @@ export default function AngeboteModule({ currentUser }) {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </section>
+
+                {/* Seitenumbruch */}
+                <section>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <Scissors size={12} /> Seitenumbruch im PDF
+                  </h3>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <label className="block text-xs text-gray-500 mb-2">Seite 2 beginnt nach:</label>
+                    <select
+                      value={selected.pageBreakAfter}
+                      onChange={e => updateField('pageBreakAfter', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="pricing">Stundenverrechnungssätze</option>
+                      <option value="surcharges">Zuschläge</option>
+                      <option value="terms">Zahlungsbedingungen</option>
+                    </select>
+                    <p className="text-xs text-gray-400 mt-2">Alle Sektionen nach dem gewählten Punkt erscheinen auf Seite 2.</p>
                   </div>
                 </section>
 
