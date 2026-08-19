@@ -185,8 +185,8 @@ function generateHTML(offer, company = {}) {
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1e293b; background:#fff; line-height:1.6; }
-    .page { width:210mm; height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; position:relative; overflow:hidden; }
-    .page-2 { width:210mm; height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; overflow:hidden; break-before:page; }
+    .page { width:210mm; min-height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; position:relative; break-after:page; }
+    .page-2 { width:210mm; min-height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; }
     .header { background:#0f172a; padding:26px 40px 22px; display:flex; justify-content:space-between; align-items:flex-end; }
     .header-logo img { height:40px; width:auto; display:block; }
     .header-tagline { font-size:8pt; color:rgba(255,255,255,0.45); letter-spacing:0.12em; text-transform:uppercase; margin-top:7px; }
@@ -242,7 +242,7 @@ function generateHTML(offer, company = {}) {
     .page-2-header span { color:rgba(255,255,255,0.7); font-size:8.5pt; }
     .page-2-header strong { color:#fff; font-weight:600; font-size:9pt; }
     .page-2-accent { height:2px; background:linear-gradient(to right,${c.accentColor},#06b6d4); }
-    @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .page, .page-2 { margin:0; width:100%; height:100%; overflow:hidden; } @page { margin:0; size:A4; } }
+    @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .page { margin:0; width:100%; break-after:page; } .page-2 { margin:0; width:100%; } @page { margin:0; size:A4; } }
   </style>
 </head>
 <body>
