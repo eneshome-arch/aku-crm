@@ -312,6 +312,9 @@ function generateHTML(offer, company = {}) {
     .v-label { font-size:8pt; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.08em; }
     .v-date { font-size:11pt; font-weight:700; color:#fff; margin-top:2px; }
     .v-note { font-size:8pt; color:rgba(255,255,255,0.5); text-align:right; max-width:180px; line-height:1.4; }
+    .insitu-badge { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; }
+    .insitu-badge svg { height:22px; width:auto; flex-shrink:0; }
+    .insitu-badge span { font-size:7.5pt; color:#64748b; line-height:1.4; }
     .closing { margin-top:14px; padding-top:10px; border-top:1px solid #e2e8f0; }
     .closing p { font-size:9.5pt; color:#334155; line-height:1.65; margin-bottom:7px; }
     .signature { margin-top:12px; }
@@ -427,6 +430,14 @@ function generateHTML(offer, company = {}) {
         <div class="term-item"><div class="term-label">Flexibilität</div><div class="term-value">Kurzfristiger Einsatz auch bei spontanem Bedarf – deutschlandweit verfügbar</div></div>
         <div class="term-item"><div class="term-label">Compliance</div><div class="term-value">Vollständig AÜG-konform, alle gesetzlichen Vorgaben werden eingehalten</div></div>
         <div class="term-item"><div class="term-label">Betreuung</div><div class="term-value">Persönlicher Ansprechpartner für Sie & unsere Mitarbeiter vor Ort</div></div>
+      </div>
+      <div class="insitu-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" height="22">
+          <circle cx="18" cy="25" r="14" fill="#2563eb"/>
+          <text x="14" y="31" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#fff">i</text>
+          <text x="40" y="34" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">In<tspan fill="#f97316">Situ</tspan></text>
+        </svg>
+        <span>Digitale Einsatzkoordination über InSitu – transparente Zeiterfassung, automatisierte Dokumentation &amp; nahtlose Kommunikation.</span>
       </div>
     </div>`
 
